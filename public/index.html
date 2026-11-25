@@ -16,16 +16,16 @@
   --bg:#f1f3f8;--surface:#ffffff;--surface2:#e8ecf4;--fg:#141a26;--muted:#56617a;--line:#cdd5e3;--line-strong:#8f9bb3;
   --accent:#2d56f2;--accent-ink:#ffffff;--accent-soft:#e3e9ff;
   --ok:#0f7f4a;--ok-ink:#ffffff;--ok-soft:#ddf4e7;--bad:#c1303c;--bad-soft:#fde5e7;
-  --code-bg:#f8f9fc;--sel:#b9c8ff;
-  --syn-sel:#1d4ed8;--syn-prop:#0e7a6e;--syn-val:#a4550a;--syn-num:#b4195f;--syn-str:#177a3b;--syn-com:#76829a;--syn-punc:#56617a;
+  --code-bg:#f8f9fc;--sel:#2449ae;--sel-ink:#fff;
+  --syn-sel:#1d4ed8;--syn-prop:#0e7a6e;--syn-val:#a4550a;--syn-num:#b4195f;--syn-str:#177a3b;--syn-com:#55627b;--syn-punc:#56617a;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#0d1118;--surface:#151b26;--surface2:#1c2432;--fg:#e7ecf6;--muted:#9aa5bb;--line:#2a3447;--line-strong:#4a5772;
     --accent:#7894ff;--accent-ink:#0a0f20;--accent-soft:#1d2849;
     --ok:#45d08c;--ok-ink:#06210f;--ok-soft:#10301f;--bad:#ff7a86;--bad-soft:#3a1a20;
-    --code-bg:#0f141d;--sel:#2c3f78;
-    --syn-sel:#8fb0ff;--syn-prop:#5fd4c2;--syn-val:#f3b663;--syn-num:#ff8fb8;--syn-str:#7fdc9b;--syn-com:#6f7b92;--syn-punc:#9aa5bb;
+    --code-bg:#0f141d;--sel:#b7ceff;--sel-ink:#101827;
+    --syn-sel:#8fb0ff;--syn-prop:#5fd4c2;--syn-val:#f3b663;--syn-num:#ff8fb8;--syn-str:#7fdc9b;--syn-com:#9aa8bf;--syn-punc:#9aa5bb;
     color-scheme:dark;
   }
 }
@@ -33,8 +33,8 @@
   --bg:#0d1118;--surface:#151b26;--surface2:#1c2432;--fg:#e7ecf6;--muted:#9aa5bb;--line:#2a3447;--line-strong:#4a5772;
     --accent:#7894ff;--accent-ink:#0a0f20;--accent-soft:#1d2849;
     --ok:#45d08c;--ok-ink:#06210f;--ok-soft:#10301f;--bad:#ff7a86;--bad-soft:#3a1a20;
-    --code-bg:#0f141d;--sel:#2c3f78;
-    --syn-sel:#8fb0ff;--syn-prop:#5fd4c2;--syn-val:#f3b663;--syn-num:#ff8fb8;--syn-str:#7fdc9b;--syn-com:#6f7b92;--syn-punc:#9aa5bb;
+    --code-bg:#0f141d;--sel:#b7ceff;--sel-ink:#101827;
+    --syn-sel:#8fb0ff;--syn-prop:#5fd4c2;--syn-val:#f3b663;--syn-num:#ff8fb8;--syn-str:#7fdc9b;--syn-com:#9aa8bf;--syn-punc:#9aa5bb;
   color-scheme:dark;
 }
 
@@ -163,14 +163,14 @@ code{font:500 .88em var(--font-mono);background:var(--surface2);padding:.12em .4
 .task code{background:var(--surface)}
 .sec-label{margin:0 0 8px;font:500 12px var(--font-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .checks{list-style:none;margin:0 0 16px;padding:0;display:flex;flex-direction:column;gap:6px}
-.checks.stale .check{opacity:.55}
+.checks.stale .check{border-style:dashed}
 .check{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
 .check .ico{flex:none;width:20px;height:20px;margin-top:1px;border-radius:50%;border:2px dashed var(--line-strong);display:grid;place-items:center;font:700 11px/1 var(--font-body)}
 .check[data-s="pass"]{border-color:var(--ok);background:var(--ok-soft)}
 .check[data-s="pass"] .ico{border:0;background:var(--ok);color:var(--ok-ink)}
 .check[data-s="pass"] .ico::before{content:"\2713"}
 .check[data-s="fail"]{border-color:var(--bad);background:var(--bad-soft)}
-.check[data-s="fail"] .ico{border:0;background:var(--bad);color:#fff}
+.check[data-s="fail"] .ico{border:0;background:var(--bad);color:var(--surface)}
 .check[data-s="fail"] .ico::before{content:"\2715"}
 .ct{min-width:0;font-size:14px}
 .why{display:block;margin-top:5px;color:var(--bad);font-size:13.5px}
@@ -194,7 +194,16 @@ code{font:500 .88em var(--font-mono);background:var(--surface2);padding:.12em .4
 .hl{overflow:hidden;pointer-events:none;color:var(--fg)}
 .hl code{display:block;background:none;padding:0;border-radius:0;font:inherit;overflow:visible}
 .ta{resize:none;overflow:auto;background:transparent;color:transparent;-webkit-text-fill-color:transparent;caret-color:var(--fg);outline:none}
-.ta::selection{background:var(--sel);color:transparent;-webkit-text-fill-color:transparent}
+::selection{background:var(--sel);color:var(--sel-ink);-webkit-text-fill-color:var(--sel-ink)}
+.ta::selection{background:var(--sel);color:var(--sel-ink);-webkit-text-fill-color:var(--sel-ink)}
+.editor:focus-within{outline:2px solid var(--accent);outline-offset:-2px}
+.hl code{min-width:max-content}
+#hostGoal{overflow:auto;background:white}
+#hostGoal img{display:block;width:440px;max-width:100%;height:auto}
+.pane-code .pane-head{flex-wrap:wrap}
+.pane-code .btn{white-space:normal}
+@media(max-width:759px){.pane-code .pane-head .grow{flex-basis:100%;height:0}.pane-code .pane-head{row-gap:3px}}
+
 .htmlview{flex:1;min-height:0;margin:0;padding:12px 16px;overflow:auto;background:var(--code-bg);font:14px/1.65 var(--font-mono);white-space:pre;tab-size:2;color:var(--fg)}
 .kbd-hint{flex:none;margin:0;padding:6px 12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
 .t-sel{color:var(--syn-sel)}.t-prop{color:var(--syn-prop)}.t-val{color:var(--syn-val)}.t-num{color:var(--syn-num)}
@@ -327,6 +336,7 @@ code{font:500 .88em var(--font-mono);background:var(--surface2);padding:.12em .4
           <button type="button" class="ftab" id="tabCss" role="tab" aria-selected="true">styles.css</button>
           <button type="button" class="ftab" id="tabHtml" role="tab" aria-selected="false">index.html</button>
           <span class="grow"></span>
+          <button type="button" class="btn small primary" id="toolbarCheck" aria-keyshortcuts="Control+Enter Meta+Enter">Kodni tekshirish</button>
           <span class="ro" id="roLabel" hidden>faqat oʻqish uchun</span>
           <button type="button" class="btn small" id="resetBtn">Tiklash</button>
         </div>
@@ -350,7 +360,7 @@ code{font:500 .88em var(--font-mono);background:var(--surface2);padding:.12em .4
         </div>
         <div class="viewport">
           <div class="preview-host" id="hostYou" role="img" aria-label="Sizning natijangiz koʻrinishi"></div>
-          <div class="preview-host" id="hostGoal" role="img" aria-label="Maqsad koʻrinishi" hidden></div>
+          <div class="preview-host" id="hostGoal" role="img" aria-label="Maqsad koʻrinishi" hidden><img alt="Mashq bajarilgandagi ko‘rinish"></div>
         </div>
       </section>
     </div>
@@ -380,9 +390,6 @@ code{font:500 .88em var(--font-mono);background:var(--surface2);padding:.12em .4
 (function () {
 'use strict';
 
-/* ===== Sozlamalar =====
-   SHOW_SOLUTIONS = false qilsangiz, oʻquvchilarga "Yechimni koʻrsatish" tugmasi chiqmaydi. */
-const SHOW_SOLUTIONS = true;
 const STORE_KEY = 'cssworkbench.v1';
 const TOPICS = window.TOPICS || [];
 const PLANNED = [
@@ -711,22 +718,17 @@ function renderLessonPane() {
     '<div class="task"><p class="task-label">Topshiriq</p>' + L.task + '</div>' +
     '<div id="doneBox"></div>' +
     '<h2 class="sec-label">Tekshiruvlar</h2><ul class="checks" id="checks"></ul>' +
-    '<div class="helpers"><button type="button" class="link" id="hintBtn">Maslahatni koʻrsatish</button>' +
-    (SHOW_SOLUTIONS ? '<button type="button" class="link" id="solBtn">Yechimni koʻrsatish</button>' : '') + '</div>' +
-    '<div class="reveal" id="hintBox" hidden><p class="sec-label">Maslahat</p><p>' + L.hint + '</p></div>' +
-    (SHOW_SOLUTIONS ? '<div class="reveal" id="solBox" hidden><p class="sec-label">Yechim</p><pre class="ex">' + hlCSS(L.solution) + '</pre><button type="button" class="btn small" id="useSol">Bu kodni muharrirga qoʻyish</button></div>' : '');
+    '<div class="helpers"><button type="button" class="link" id="hintBtn" aria-controls="hintBox" aria-expanded="false">Maslahatni koʻrsatish</button></div>' +
+    '<div class="reveal" id="hintBox" hidden><p class="sec-label">Maslahat</p><p>' + L.hint + '</p></div>';
   $('#lessonScroll').scrollTop = 0;
-  $('#hintBtn').addEventListener('click', () => toggleReveal('hint'));
-  if (SHOW_SOLUTIONS) {
-    $('#solBtn').addEventListener('click', () => toggleReveal('sol'));
-    $('#useSol').addEventListener('click', () => { setCode(L.solution); });
-  }
+  $('#hintBtn').addEventListener('click', toggleHint);
   renderChecks();
 }
-function toggleReveal(which) {
-  const box = $('#' + which + 'Box'), btn = $('#' + which + 'Btn');
+function toggleHint() {
+  const box = $('#hintBox'), btn = $('#hintBtn');
   box.hidden = !box.hidden;
-  btn.textContent = which === 'hint' ? (box.hidden ? 'Maslahatni koʻrsatish' : 'Maslahatni yashirish') : (box.hidden ? 'Yechimni koʻrsatish' : 'Yechimni yashirish');
+  btn.setAttribute('aria-expanded', String(!box.hidden));
+  btn.textContent = box.hidden ? 'Maslahatni koʻrsatish' : 'Maslahatni yashirish';
   if (!box.hidden) box.scrollIntoView({ block: 'nearest' });
 }
 function renderChecks() {
@@ -758,9 +760,10 @@ function updateBar() {
 }
 function check() {
   const L = step();
+  if (state.result && !state.stale) return;
   state.result = runTests(L, ta.value);
   state.stale = false;
-  if (state.result.every(r => r.ok)) { store.done[keyOf(state.topic, L)] = true; saveStore(true); renderNav(); }
+  if (state.result.every(r => r.ok) && !isDone(state.topic, L)) { store.done[keyOf(state.topic, L)] = true; saveStore(true); renderNav(); }
   renderChecks(); updateBar();
 }
 
@@ -896,11 +899,14 @@ function setTab(name) {
 }
 function setFile(f) {
   state.file = f;
+  $('#toolbarCheck').hidden = f !== 'css';
   $('#editor').hidden = f !== 'css'; $('#htmlView').hidden = f !== 'html'; $('#roLabel').hidden = f !== 'html'; $('#resetBtn').hidden = f !== 'css';
   $('#tabCss').setAttribute('aria-selected', String(f === 'css')); $('#tabHtml').setAttribute('aria-selected', String(f === 'html'));
 }
 function setMode(m) {
   state.mode = m;
+  const image = $('#hostGoal img');
+  if (m === 'goal' && !image.hasAttribute('src')) image.src = 'goals/' + state.topic.id + '-' + step().id + '.png';
   $('#hostYou').hidden = m !== 'you'; $('#hostGoal').hidden = m !== 'goal';
   $('#tabYou').setAttribute('aria-selected', String(m === 'you')); $('#tabGoal').setAttribute('aria-selected', String(m === 'goal'));
 }
@@ -910,6 +916,7 @@ function setHash(h) { try { if (location.hash.replace(/^#/, '') !== h) location.
 function openStep(T, i) {
   state.topic = T; state.idx = i; state.result = null; state.stale = false; state.qres = null;
   document.title = 'CSS Workbench';
+  clearTimeout(previewTimer);
   const st = step();
   if (st.type === 'quiz') openQuiz(T, st); else openLesson(T, st);
 }
@@ -920,7 +927,7 @@ function openLesson(T, L) {
   lineCount = 0; syncEditor(); ta.scrollTop = 0; ta.scrollLeft = 0; syncScroll();
   $('#htmlView').innerHTML = hlHTML(L.html);
   renderInto($('#hostYou'), L.html, ta.value);
-  renderInto($('#hostGoal'), L.html, L.solution);
+  $('#hostGoal img').removeAttribute('src');
   setFile('css'); setMode('you'); setTab('lesson');
   updateBar();
 }
@@ -967,6 +974,7 @@ $('#tabCss').addEventListener('click', () => setFile('css'));
 $('#tabHtml').addEventListener('click', () => setFile('html'));
 $('#tabYou').addEventListener('click', () => setMode('you'));
 $('#tabGoal').addEventListener('click', () => setMode('goal'));
+$('#toolbarCheck').addEventListener('click', check);
 $('#checkBtn').addEventListener('click', () => { if ($('#checkBtn').dataset.mode === 'next') nextStep(); else check(); });
 $('#qBtn').addEventListener('click', () => { if ($('#qBtn').dataset.mode === 'next') nextStep(); else checkQuiz(); });
 $('#status').addEventListener('click', () => { setTab('lesson'); const c = $('#checks'); if (c) c.scrollIntoView({ block: 'nearest' }); });

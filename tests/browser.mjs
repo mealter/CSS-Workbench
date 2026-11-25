@@ -1,24 +1,12 @@
 // Optional test-only dependency: playwright-core, with a locally installed Chrome.
-import http from 'node:http';
+import {startPreview} from './preview.mjs';
 import fs from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import assert from 'node:assert/strict';
-import {fixture} from './local-backend.mjs';
-import handler from '../netlify/functions/api.mjs';
 const {chromium}=createRequire(import.meta.url)('playwright-core');
-const f=fixture(), server=http.createServer(async(req,res)=>{
-  if(req.url==='/api/workbench'){
-    const chunks=[];for await(const chunk of req)chunks.push(chunk);
-    const r=await handler(new Request(process.env.SITE_ORIGIN+req.url,{method:req.method,headers:req.headers,body:Buffer.concat(chunks)}),{ip:'127.0.0.1'});
-    res.writeHead(r.status,Object.fromEntries(r.headers));res.end(await r.text());return;
-  }
-  const name=req.url==='/'?'index.html':req.url.slice(1);
-  if(!['index.html','account.css','account.js','curriculum.js'].includes(name)){res.writeHead(404);res.end();return;}
-  res.setHeader('Content-Type',({'css':'text/css','js':'text/javascript','html':'text/html'})[name.split('.').pop()]+'; charset=utf-8');
-  res.end(await fs.readFile(new URL('../public/'+name,import.meta.url)));
-});
-await new Promise(r=>server.listen(0,'localhost',r));
-const origin=process.env.SITE_ORIGIN='http://localhost:'+server.address().port;
+const preview=await startPreview();
+const {f,origin}=preview;
+const solutions=JSON.parse(await fs.readFile(new URL('./reference-solutions.json',import.meta.url),'utf8'));
 const browser=await chromium.launch({executablePath:process.env.CHROME_PATH,headless:true});
 const errors=[];
 async function open(context) {
@@ -50,16 +38,17 @@ try{
   await a.setOffline(false);await p.waitForSelector('#resolve');await p.click('#keepLocal');await synced(p);
   f.control.quota=true;await p.fill('#ta','/* quota */');await p.waitForFunction(()=>document.querySelector('#sync').textContent.includes('xatolik'));
   f.control.quota=false;await synced(p);await q.reload();await q.waitForSelector('#ta');assert.equal(await q.inputValue('#ta'),'/* quota */');
-  const curriculum=await p.evaluate(()=>TOPICS.flatMap(t=>t.steps.map((s,i)=>({path:t.id+'-'+(i+1),quiz:s.questions?.map(q=>q.answer)}))));
+  const curriculum=await p.evaluate(()=>TOPICS.flatMap(t=>t.steps.map((s,i)=>({path:t.id+'-'+(i+1),id:t.id+'/'+s.id,quiz:s.questions?.map(q=>q.answer)}))));
   const failures=[];
   for(const step of curriculum){
     await route(p,step.path);
+    if(!step.quiz) await p.fill('#ta',solutions[step.id]);
     const result=await p.evaluate(step=>{
       if(step.quiz){
         step.quiz.forEach((a,i)=>document.querySelector('input[name=q'+i+'][value="'+a+'"]').click());
         document.querySelector('#qBtn').click();return document.querySelector('#qBtn').dataset.mode;
       }
-      document.querySelector('#solBtn').click();document.querySelector('#useSol').click();document.querySelector('#checkBtn').click();
+      document.querySelector('#toolbarCheck').click();
       return document.querySelector('#checkBtn').dataset.mode;
     },step);
     if(result!=='next') failures.push(step.path);
@@ -88,5 +77,5 @@ try{
   await sign(p,'student02');await route(p,'borders-1');await synced(p);
   assert.equal(await p.inputValue('#ta'),'/* student02 unsent */');
   assert.deepEqual(errors,[]);console.log('Browser account, offline, quota, conflict, theme, mobile and curriculum checks passed.');
-} finally {await browser.close();server.close();f.close();}
+} finally {await browser.close();preview.close();}
 

@@ -1,6 +1,10 @@
-# CSS Workbench
+# CSS Workbench v1.1
 
 An Uzbek-language CSS classroom workbench with student accounts and progress saved to a private Google spreadsheet. Open the deployed HTTPS site to use the application. Opening the HTML file directly runs outside the authentication gateway.
+
+## Review v1.1 locally
+
+Run `node tests/preview.mjs` from the project root, open `http://localhost:4173` and register a disposable account. This preview uses an in-memory spreadsheet and temporary credentials. Restarting the process clears its test accounts. See [v1.1 review and screenshots](review/v1.1/README.md) for changes and verification. The existing deployment configuration works with v1.1.
 
 ## What changed
 
@@ -63,7 +67,7 @@ For future Apps Script changes, save the code, then **Deploy → Manage deployme
 | ProgressJSON / JSON 2… | Existing done, code and answers maps. Large JSON spans cells in chunks of at most 40,000 UTF-16 units. Each continuation has a protective prefix removed during reconstruction. |
 | Revision | Version used to detect concurrent changes |
 
-Practical completion comes from the browser. The gateway recalculates quiz marks from answer choices and the curriculum key. Changing a checked quiz answer reopens that quiz for checking. Students can view the curriculum answers and example solutions in the client. Use these results for formative practice. High-stakes examinations need a different assessment design.
+Practical completion comes from the browser. The gateway recalculates quiz marks from answer choices and the curriculum key. Changing a checked quiz answer reopens that quiz for checking. The client contains quiz answer keys and practical validators. Complete practical reference CSS lives in the private test files. The Maqsad tab shows a reference image. Use these results for formative practice. High-stakes examinations need a different assessment design.
 
 ### Reset a forgotten password
 

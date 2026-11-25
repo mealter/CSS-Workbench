@@ -4,7 +4,7 @@ const topics = [];
    Yangi mavzu qoʻshish uchun shu formatda yangi fayl yarating (src/topics/ papkasiga).
    Tuzilishi: mavzu -> boʻlimlar (sections) -> qadamlar (steps).
    Qadam ikki xil boʻladi:
-     dars  : { id, title, learn, example?, task, html, css, solution, hint, tests }
+     dars  : { id, title, learn, example?, task, html, css, hint, tests }
      test  : { id, title, questions: [ { q, code?, options, answer, why } ] }   (answer = toʻgʻri variant raqami, 0 dan boshlanadi) */
 topics.push({
   id: 'borders',
@@ -27,8 +27,8 @@ topics.push({
           task: '<p><code>.box</code> elementiga yaxlit (<code>solid</code>) chegara bering.</p>',
           html: '<div class="box">Men qutiman.</div>',
           css: '.box {\n  padding: 24px;\n  background: #e6ecff;\n  /* Chegarani shu yerga yozing */\n}\n',
-          solution: '.box {\n  padding: 24px;\n  background: #e6ecff;\n  border-style: solid;\n}\n',
-          hint: 'Figurali qavslar ichida alohida qatorga <code>border-style: solid;</code> deb yozing. CSS dagi har bir qator nuqtali vergul (<code>;</code>) bilan tugaydi.',
+
+          hint: 'Chegaraning rangi va qalinligi uning ko‘rinishini yolg‘iz o‘zi belgilamaydi. <code>border-style</code> qiymatlaridan qaysi biri uzluksiz chiziq chizadi?',
           tests: [
             ['`.box` ning toʻrt tomonida ham `border-style: solid` bor', c => c.allSides('.box', 'style', 'solid')],
             ['Chegara koʻrinadi (qalinligi `0px` dan katta)', c => c.assert(c.px(c.side('.box', 'top', 'width')) > 0, 'Chegara uslub berilmaguncha koʻrinmaydi. `border-style: solid;` deb yozib koʻring.')]
@@ -42,8 +42,8 @@ topics.push({
           task: '<p><code>.box</code> da yaxlit chegara allaqachon bor. Uning qalinligini <code>8px</code> qiling.</p>',
           html: '<div class="box">Men qutiman.</div>',
           css: '.box {\n  padding: 24px;\n  background: #e6ecff;\n  border-style: solid;\n}\n',
-          solution: '.box {\n  padding: 24px;\n  background: #e6ecff;\n  border-style: solid;\n  border-width: 8px;\n}\n',
-          hint: '<code>border-style</code> qatori ostiga <code>border-width: 8px;</code> qoʻshing. Birlik — <code>px</code> ni unutmang.',
+
+          hint: 'Chiziqning uslubini saqlang. Uning qalinligini qaysi xossa boshqaradi? O‘lchov birligini ham yozing.',
           tests: [
             ['`.box` chegarasi toʻrt tomonda ham `8px` qalin', c => c.allSides('.box', 'width', '8px')],
             ['Chegara hamon `solid`', c => c.allSides('.box', 'style', 'solid')]
@@ -57,8 +57,8 @@ topics.push({
           task: '<p><code>.box</code> chegarasining rangini <code>royalblue</code> qiling.</p>',
           html: '<div class="box">Men qutiman.</div>',
           css: '.box {\n  padding: 24px;\n  background: #e6ecff;\n  border-style: solid;\n  border-width: 6px;\n}\n',
-          solution: '.box {\n  padding: 24px;\n  background: #e6ecff;\n  border-style: solid;\n  border-width: 6px;\n  border-color: royalblue;\n}\n',
-          hint: '<code>.box</code> qoidasiga <code>border-color: royalblue;</code> qoʻshing.',
+
+          hint: 'Qalinlik va uslub allaqachon berilgan. Faqat rangni o‘zgartiradigan chegara xossasini toping.',
           tests: [
             ['`.box` chegarasi toʻrt tomonda ham `royalblue` rangda', c => c.allSides('.box', 'color', 'royalblue')],
             ['Chegara hamon `6px` qalin va `solid`', c => { c.allSides('.box', 'width', '6px'); c.allSides('.box', 'style', 'solid'); }]
@@ -72,8 +72,8 @@ topics.push({
           task: '<p><code>.box</code> dagi uchta alohida chegara qatorini oʻchiring va oʻrniga bitta <code>border</code> qatori yozing: <code>5px</code> qalin, <code>solid</code>, rangi <code>seagreen</code>.</p>',
           html: '<div class="box">Men qutiman.</div>',
           css: '.box {\n  padding: 24px;\n  background: #e6ecff;\n  border-width: 2px;\n  border-style: dotted;\n  border-color: gray;\n}\n',
-          solution: '.box {\n  padding: 24px;\n  background: #e6ecff;\n  border: 5px solid seagreen;\n}\n',
-          hint: 'Butun javob bitta qator: <code>border: 5px solid seagreen;</code>. <code>border-width</code>, <code>border-style</code> va <code>border-color</code> qatorlarini oʻchiring.',
+
+          hint: 'Qalinlik, uslub va rangni bitta <code>border</code> deklaratsiyasida qanday birlashtirish mumkin?',
           tests: [
             ['Siz `border` qisqartmasidan foydalandingiz', c => c.assert(/(^|[;{\s])border\s*:/.test(c.src), 'Qatorni `border:` bilan boshlang.')],
             ['Chegara toʻrt tomonda ham `5px solid seagreen`', c => { c.allSides('.box', 'width', '5px'); c.allSides('.box', 'style', 'solid'); c.allSides('.box', 'color', 'seagreen'); }],
@@ -133,7 +133,7 @@ topics.push({
           task: '<p><code>.title</code> ga <code>3px</code> qalin, yaxlit, <code>teal</code> rangli pastki chegara bering (xuddi tagiga chizilgan chiziqdek). Boshqa uch tomonda chegara boʻlmasin.</p>',
           html: '<h2 class="title">Kosmos haqida</h2>\n<p>Venerada kun uning yilidan uzunroq.</p>',
           css: '.title {\n  padding-bottom: 6px;\n}\n',
-          solution: '.title {\n  padding-bottom: 6px;\n  border-bottom: 3px solid teal;\n}\n',
+
           hint: '<code>border</code> emas, <code>border-bottom</code> dan foydalaning. Oddiy <code>border</code> toʻrt tomonni ham chizib yuboradi.',
           tests: [
             ['`.title` ning pastki chegarasi `3px solid`', c => { c.expectSide('.title', 'bottom', 'width', '3px'); c.expectSide('.title', 'bottom', 'style', 'solid'); }],
@@ -149,8 +149,8 @@ topics.push({
           task: '<p><code>.btn</code> tugmasida brauzerdan kelgan qalin kulrang ramka bor. Uning chegarasini olib tashlang.</p>',
           html: '<button class="btn">Bosing</button>',
           css: '.btn {\n  padding: 10px 22px;\n  font-size: 16px;\n  background: #2d56f2;\n  color: white;\n}\n',
-          solution: '.btn {\n  padding: 10px 22px;\n  font-size: 16px;\n  background: #2d56f2;\n  color: white;\n  border: none;\n}\n',
-          hint: '<code>.btn</code> qoidasi ichiga <code>border: none;</code> qoʻshing.',
+
+          hint: 'Tugmaning odatiy chegarasi brauzerdan keladi. Chegara uslublari orasidan chiziq chizmaydigan qiymatni izlang.',
           tests: [
             ['`.btn` ning hech bir tomonida chegara yoʻq', c => c.allSides('.btn', 'width', '0px')]
           ]
@@ -163,8 +163,8 @@ topics.push({
           task: '<p>Quyidagi qutilarning qalinligi va rangi tayyor. <code>.dashed</code> ga uzuq chiziqli, <code>.dotted</code> ga nuqtali, <code>.double</code> ga ikkilangan chegara bering.</p>',
           html: '<div class="demo dashed">dashed</div>\n<div class="demo dotted">dotted</div>\n<div class="demo double">double</div>',
           css: '.demo {\n  padding: 12px;\n  margin-bottom: 12px;\n  border-width: 4px;\n  border-color: #2d56f2;\n}\n\n/* Har bir qutiga oʻz border-style qiymatini bering */\n.dashed {\n}\n\n.dotted {\n}\n\n.double {\n}\n',
-          solution: '.demo {\n  padding: 12px;\n  margin-bottom: 12px;\n  border-width: 4px;\n  border-color: #2d56f2;\n}\n\n/* Har bir qutiga oʻz border-style qiymatini bering */\n.dashed {\n  border-style: dashed;\n}\n\n.dotted {\n  border-style: dotted;\n}\n\n.double {\n  border-style: double;\n}\n',
-          hint: 'Har bir boʻsh qoida ichiga bitta deklaratsiya yozing, masalan <code>.dashed { }</code> ichiga <code>border-style: dashed;</code>.',
+
+          hint: 'Umumiy qoida qalinlik va rangni belgilab turibdi. Endi har bir sinfga mos chiziq uslubini alohida tanlang.',
           tests: [
             ['`.dashed` da uzuq chiziqli chegara bor', c => c.allSides('.dashed', 'style', 'dashed')],
             ['`.dotted` da nuqtali chegara bor', c => c.allSides('.dotted', 'style', 'dotted')],
@@ -180,8 +180,8 @@ topics.push({
           task: '<p><code>.frame</code> chegarasini har tomonda har xil qiling: yuqori <code>2px</code>, oʻng <code>6px</code>, pastki <code>10px</code>, chap <code>14px</code>.</p>',
           html: '<div class="frame">Soat strelkasi boʻylab: yuqori, oʻng, pastki, chap</div>',
           css: '.frame {\n  padding: 20px;\n  border-style: solid;\n  border-color: #2d56f2;\n}\n',
-          solution: '.frame {\n  padding: 20px;\n  border-style: solid;\n  border-color: #2d56f2;\n  border-width: 2px 6px 10px 14px;\n}\n',
-          hint: 'Bitta qator yetarli: <code>border-width: 2px 6px 10px 14px;</code>. Yozayotganda “yuqori, oʻng, pastki, chap” deb ovoz chiqarib ayting.',
+
+          hint: 'To‘rtta qalinlik yuqoridan boshlanib, soat strelkasi bo‘ylab taqsimlanadi. Har bir o‘lcham qaysi tomonga tegishli?',
           tests: [
             ['Yuqori chegara `2px`', c => c.expectSide('.frame', 'top', 'width', '2px')],
             ['Oʻng chegara `6px`', c => c.expectSide('.frame', 'right', 'width', '6px')],
@@ -241,8 +241,8 @@ topics.push({
           task: '<p><code>.card</code> ning toʻrt burchagini <code>16px</code> radius bilan yumaloqlang.</p>',
           html: '<div class="card">Chiroyli kartochka</div>',
           css: '.card {\n  padding: 24px;\n  background: #e6ecff;\n  border: 3px solid #2d56f2;\n}\n',
-          solution: '.card {\n  padding: 24px;\n  background: #e6ecff;\n  border: 3px solid #2d56f2;\n  border-radius: 16px;\n}\n',
-          hint: '<code>.card</code> qoidasiga <code>border-radius: 16px;</code> qoʻshing.',
+
+          hint: 'Burchakning egilishini chegara qalinligidan alohida boshqarish mumkin. Radius oshsa, burchak qanday o‘zgaradi?',
           tests: [
             ['`.card` ning toʻrt burchagida ham `16px` radius bor', c => c.allCorners('.card', '16px')],
             ['`3px` chegara hamon joyida', c => c.allSides('.card', 'width', '3px')]
@@ -256,8 +256,8 @@ topics.push({
           task: '<p><code>.avatar</code> ni mukammal aylana, <code>.pill</code> ni esa uchlari toʻliq yumaloq tugma qiling.</p>',
           html: '<div class="avatar">AB</div>\n<button class="pill">Obuna</button>',
           css: '.avatar {\n  width: 120px;\n  height: 120px;\n  display: grid;\n  place-items: center;\n  background: #2d56f2;\n  color: white;\n  font-size: 36px;\n  font-weight: bold;\n}\n\n.pill {\n  margin-top: 16px;\n  padding: 10px 28px;\n  font-size: 16px;\n  background: white;\n  color: #2d56f2;\n  border: 2px solid #2d56f2;\n}\n',
-          solution: '.avatar {\n  width: 120px;\n  height: 120px;\n  display: grid;\n  place-items: center;\n  background: #2d56f2;\n  color: white;\n  font-size: 36px;\n  font-weight: bold;\n  border-radius: 50%;\n}\n\n.pill {\n  margin-top: 16px;\n  padding: 10px 28px;\n  font-size: 16px;\n  background: white;\n  color: #2d56f2;\n  border: 2px solid #2d56f2;\n  border-radius: 999px;\n}\n',
-          hint: '<code>.avatar</code> ga <code>border-radius: 50%;</code>, <code>.pill</code> ga <code>border-radius: 999px;</code> bering.',
+
+          hint: 'Kvadratni doiraga aylantirish uchun radiusni tomon uzunligiga nisbatan o‘ylang. Uzun tugmaning uchlari tutashishi uchun qancha yumaloqlik yetadi?',
           tests: [
             ['`.avatar` — aylana (`border-radius: 50%`)', c => {
               c.CORNERS.forEach(k => { const r = c.radius('.avatar', k); c.assert(r.unit === '%' ? r.n >= 50 : r.n >= 60, '`.avatar` ning har bir burchagi uchun `50%` radius kerak.'); });
@@ -280,8 +280,8 @@ topics.push({
           task: '<p><code>.bubble</code> ning uchta burchagini <code>20px</code> bilan yumaloqlang, <strong>pastki chap</strong> burchagini esa oʻtkir (<code>0</code>) qoldiring.</p>',
           html: '<div class="bubble">Salom! Veb-sayt yaratamizmi?</div>',
           css: '.bubble {\n  display: inline-block;\n  max-width: 260px;\n  padding: 14px 18px;\n  background: #2d56f2;\n  color: white;\n}\n',
-          solution: '.bubble {\n  display: inline-block;\n  max-width: 260px;\n  padding: 14px 18px;\n  background: #2d56f2;\n  color: white;\n  border-radius: 20px 20px 20px 0;\n}\n',
-          hint: 'Yuqori chapdan soat strelkasi boʻylab: <code>border-radius: 20px 20px 20px 0;</code>. Oxirgi qiymat — pastki chap burchak.',
+
+          hint: 'Radiuslar yuqori chap burchakdan boshlab soat strelkasi bo‘ylab beriladi. Qaysi burchak to‘g‘ri qolishi kerak?',
           tests: [
             ['Yuqori chap burchak `20px`', c => c.expectCorner('.bubble', 'top-left', '20px')],
             ['Yuqori oʻng burchak `20px`', c => c.expectCorner('.bubble', 'top-right', '20px')],
@@ -335,8 +335,8 @@ topics.push({
           task: '<p><code>.selected</code> ni <code>3px</code> qalin, yaxlit, <code>orange</code> rangli outline va <code>4px</code> <code>outline-offset</code> bilan ajrating. <code>border</code> ishlatmang: quti kattalashmasligi kerak.</p>',
           html: '<div class="item selected">Tanlangan</div>\n<div class="item">Keyingi quti</div>',
           css: '.item {\n  width: 200px;\n  padding: 12px;\n  margin-bottom: 14px;\n  background: #e6ecff;\n}\n\n.selected {\n}\n',
-          solution: '.item {\n  width: 200px;\n  padding: 12px;\n  margin-bottom: 14px;\n  background: #e6ecff;\n}\n\n.selected {\n  outline: 3px solid orange;\n  outline-offset: 4px;\n}\n',
-          hint: '<code>.selected { }</code> ichiga ikki qator yozing: <code>outline: 3px solid orange;</code> va <code>outline-offset: 4px;</code>.',
+
+          hint: 'Tashqi chiziq bilan element orasidagi masofani ham tekshiring. Chiziqni chizish va uni siljitish uchun turli xossalar kerak.',
           tests: [
             ['`.selected` da `3px solid` outline bor', c => c.assert(c.val('.selected', 'outline-width') === '3px' && c.val('.selected', 'outline-style') === 'solid', '`outline: 3px solid orange;` dan foydalaning.')],
             ['Outline rangi `orange`', c => c.assert(c.val('.selected', 'outline-color') === c.color('orange'), 'Outline rangi `orange` boʻlishi kerak.')],
@@ -353,8 +353,8 @@ topics.push({
           task: '<p><code>.box</code> chegarasi bilan birga <code>200px</code> keng boʻlishi kerak, lekin u kengroq. Buni bitta yangi qator bilan tuzating. Kenglik, padding va chegarani oʻzgartirmang.</p>',
           html: '<div class="box">Men 200px keng boʻlishim kerak.</div>',
           css: '.box {\n  width: 200px;\n  padding: 20px;\n  border: 10px solid #2d56f2;\n  background: #e6ecff;\n}\n',
-          solution: '.box {\n  width: 200px;\n  padding: 20px;\n  border: 10px solid #2d56f2;\n  background: #e6ecff;\n  box-sizing: border-box;\n}\n',
-          hint: '<code>.box</code> qoidasiga <code>box-sizing: border-box;</code> qoʻshing.',
+
+          hint: 'Berilgan kenglik ichiga ichki masofa va chegara ham sig‘ishi kerak. Qutining o‘lchamini hisoblash usulini qayerda tanlaysiz?',
           tests: [
             ['`.box` da `box-sizing: border-box` bor', c => c.assert(c.val('.box', 'box-sizing') === 'border-box', '`box-sizing: border-box;` qoʻshing.')],
             ['`.box` ning umumiy kengligi aniq `200px`', c => { const w = Math.round(c.q('.box').getBoundingClientRect().width); c.assert(w === 200, '`.box` ning umumiy kengligi `' + w + 'px`. U `200px` boʻlishi kerak.'); }],
@@ -409,8 +409,8 @@ topics.push({
           task: '<ol><li>Qoʻsh chiziqlarni birlashtiring: <code>.planets</code> jadvaliga <code>border-collapse: collapse;</code> qoʻshing.</li><li>Sarlavha kataklariga (<code>th</code>) <code>3px</code> qalin, yaxlit pastki chegara bering.</li></ol>',
           html: '<table class="planets">\n  <tr><th>Sayyora</th><th>Yoʻldoshlar</th></tr>\n  <tr><td>Yer</td><td>1</td></tr>\n  <tr><td>Mars</td><td>2</td></tr>\n</table>',
           css: '.planets th,\n.planets td {\n  border: 1px solid #56617a;\n  padding: 8px 18px;\n}\n',
-          solution: '.planets {\n  border-collapse: collapse;\n}\n\n.planets th,\n.planets td {\n  border: 1px solid #56617a;\n  padding: 8px 18px;\n}\n\n.planets th {\n  border-bottom: 3px solid #56617a;\n}\n',
-          hint: 'Yangi qoida yozing: <code>.planets { border-collapse: collapse; }</code>. Keyin katak qoidasidan <em>keyin</em> <code>.planets th { border-bottom: 3px solid #56617a; }</code> qoidasini yozing.',
+
+          hint: 'Avval qo‘shni kataklar orasidagi ikkita chiziqni birlashtiring. Keyin faqat sarlavha kataklarining pastki tomonini o‘zgartiradigan selektorni tanlang.',
           tests: [
             ['Jadvalda `border-collapse: collapse` bor', c => c.assert(c.val('.planets', 'border-collapse') === 'collapse', '`.planets` qoidasiga `border-collapse: collapse;` qoʻshing.')],
             ['Maʼlumot kataklari (`td`) `1px solid` chegarasini saqlagan', c => c.qa('.planets td').forEach(td => { c.expectSide(td, 'top', 'width', '1px'); c.expectSide(td, 'top', 'style', 'solid'); })],
@@ -464,7 +464,7 @@ topics.push({
           task: '<ol><li><code>.profile</code>: <code>2px</code> yaxlit <code>royalblue</code> chegara va <code>16px</code> yumaloq burchaklar.</li><li><code>.profile</code> ning chegara va padding bilan birga umumiy kengligi <code>280px</code> boʻlsin.</li><li><code>.avatar</code>: aylana, <code>4px</code> yaxlit <code>gold</code> chegarali.</li><li>Har bir <code>.row</code>: faqat pastida <code>1px</code> uzuq chiziqli <code>gray</code> chiziq.</li><li><code>.follow</code>: chegarasiz va uchlari toʻliq yumaloq.</li></ol>',
           html: '<article class="profile">\n  <div class="avatar">NB</div>\n  <h2>Nodira Bekova</h2>\n  <p class="role">8-sinf, Python toʻgaragi</p>\n  <div class="row"><span>Loyihalar</span> <strong>12</strong></div>\n  <div class="row"><span>Nishonlar</span> <strong>5</strong></div>\n  <button class="follow">Obuna</button>\n</article>',
           css: '.profile {\n  width: 280px;\n  padding: 20px;\n  background: white;\n}\n\n.avatar {\n  width: 80px;\n  height: 80px;\n  display: grid;\n  place-items: center;\n  background: #2d56f2;\n  color: white;\n  font-size: 28px;\n  font-weight: bold;\n}\n\n.profile h2 {\n  margin: 12px 0 0;\n}\n\n.role {\n  margin: 0 0 12px;\n  color: #56617a;\n}\n\n.row {\n  display: flex;\n  justify-content: space-between;\n  padding: 10px 0;\n}\n\n.follow {\n  margin-top: 16px;\n  padding: 10px 26px;\n  font-size: 16px;\n  background: #2d56f2;\n  color: white;\n}\n',
-          solution: '.profile {\n  width: 280px;\n  padding: 20px;\n  background: white;\n  border: 2px solid royalblue;\n  border-radius: 16px;\n  box-sizing: border-box;\n}\n\n.avatar {\n  width: 80px;\n  height: 80px;\n  display: grid;\n  place-items: center;\n  background: #2d56f2;\n  color: white;\n  font-size: 28px;\n  font-weight: bold;\n  border: 4px solid gold;\n  border-radius: 50%;\n}\n\n.profile h2 {\n  margin: 12px 0 0;\n}\n\n.role {\n  margin: 0 0 12px;\n  color: #56617a;\n}\n\n.row {\n  display: flex;\n  justify-content: space-between;\n  padding: 10px 0;\n  border-bottom: 1px dashed gray;\n}\n\n.follow {\n  margin-top: 16px;\n  padding: 10px 26px;\n  font-size: 16px;\n  background: #2d56f2;\n  color: white;\n  border: none;\n  border-radius: 999px;\n}\n',
+
           hint: 'Roʻyxatni yuqoridan pastga, bir qoidadan keyin ikkinchisiga oʻtib bajaring. <code>.row</code> uchun <code>border</code> emas, <code>border-bottom</code> ishlating. Karta kengligi uchun <code>box-sizing</code> haqida oʻylang.',
           tests: [
             ['`.profile` da toʻrt tomonda ham `2px solid royalblue` chegara bor', c => { c.allSides('.profile', 'width', '2px'); c.allSides('.profile', 'style', 'solid'); c.allSides('.profile', 'color', 'royalblue'); }],
@@ -512,8 +512,8 @@ topics.push({
           task: '<p><code>.box</code> ning toʻrt tomoniga ham <code>24px</code> tashqi masofa bering.</p>',
           html: '<div class="box">Men qutiman.</div>',
           css: '.box {\n  padding: 12px;\n  background: #e6ecff;\n  border: 2px solid #2d56f2;\n  /* Margin ni shu yerga yozing */\n}\n',
-          solution: '.box {\n  padding: 12px;\n  background: #e6ecff;\n  border: 2px solid #2d56f2;\n  margin: 24px;\n}\n',
-          hint: 'Figurali qavslar ichida alohida qatorga <code>margin: 24px;</code> deb yozing.',
+
+          hint: 'Quti bilan uning tashqarisidagi elementlar orasidagi joyni qaysi xossa boshqaradi? To‘rt tomonda masofa bir xil.',
           tests: [
             ['`.box` ning toʻrt tomonida ham `24px` margin bor', c => c.qa('.box').forEach(b => c.allMargins(b, '24px'))],
             ['Ichki masofa (`padding`) hamon `12px`', c => c.assert(c.val('.box', 'padding-top') === '12px', 'Margin — tashqi masofa. Ichki masofa (`padding`) ni `12px` qoldiring va `margin` yozing.')]
@@ -527,8 +527,8 @@ topics.push({
           task: '<p><code>.box</code> ni chapdan <code>40px</code>, yuqoridan <code>16px</code> suring. Oʻng va pastki tomonda margin boʻlmasin.</p>',
           html: '<div class="box">Men siljiyman.</div>',
           css: '.box {\n  padding: 12px;\n  background: #e6ecff;\n  border: 2px solid #2d56f2;\n}\n',
-          solution: '.box {\n  padding: 12px;\n  background: #e6ecff;\n  border: 2px solid #2d56f2;\n  margin-left: 40px;\n  margin-top: 16px;\n}\n',
-          hint: '<code>margin-left: 40px;</code> va <code>margin-top: 16px;</code> deb ikki qator yozing.',
+
+          hint: 'Qutining faqat ikki tomoni siljishi kerak. Har bir tomon uchun alohida tashqi masofa xossasini toping.',
           tests: [
             ['Chap margin `40px`', c => c.expectMargin('.box', 'left', '40px')],
             ['Yuqori margin `16px`', c => c.expectMargin('.box', 'top', '16px')],
@@ -543,8 +543,8 @@ topics.push({
           task: '<p><code>.badge</code> ga yuqoridan va pastdan <code>8px</code>, chapdan va oʻngdan <code>24px</code> margin bering. Bitta <code>margin</code> qatori yozing.</p>',
           html: '<span class="badge">Yangi</span><span class="badge">Mashhur</span>',
           css: '.badge {\n  display: inline-block;\n  padding: 4px 12px;\n  background: #2d56f2;\n  color: white;\n  border-radius: 999px;\n}\n',
-          solution: '.badge {\n  display: inline-block;\n  padding: 4px 12px;\n  background: #2d56f2;\n  color: white;\n  border-radius: 999px;\n  margin: 8px 24px;\n}\n',
-          hint: 'Bitta qator: <code>margin: 8px 24px;</code>. Birinchi qiymat — yuqori va pastki, ikkinchisi — chap va oʻng.',
+
+          hint: 'Ikki qiymatli qisqa yozuvda birinchi qiymat tik, ikkinchisi yotiq yo‘nalishga ta’sir qiladi.',
           tests: [
             ['Yuqori va pastki margin `8px`', c => c.qa('.badge').forEach(b => { c.expectMargin(b, 'top', '8px'); c.expectMargin(b, 'bottom', '8px'); })],
             ['Chap va oʻng margin `24px`', c => c.qa('.badge').forEach(b => { c.expectMargin(b, 'left', '24px'); c.expectMargin(b, 'right', '24px'); })],
@@ -559,8 +559,8 @@ topics.push({
           task: '<ol><li><code>.one</code> ga toʻrt qiymat bering: yuqori <code>10px</code>, oʻng <code>20px</code>, pastki <code>30px</code>, chap <code>40px</code>.</li><li><code>.two</code> ga uch qiymat bering: yuqori <code>5px</code>, chap va oʻng <code>15px</code>, pastki <code>25px</code>.</li></ol>',
           html: '<div class="box one">.one</div>\n<div class="box two">.two</div>',
           css: '.box {\n  padding: 12px;\n  background: #e6ecff;\n  border: 2px solid #2d56f2;\n}\n\n.one {\n}\n\n.two {\n}\n',
-          solution: '.box {\n  padding: 12px;\n  background: #e6ecff;\n  border: 2px solid #2d56f2;\n}\n\n.one {\n  margin: 10px 20px 30px 40px;\n}\n\n.two {\n  margin: 5px 15px 25px;\n}\n',
-          hint: '<code>.one { margin: 10px 20px 30px 40px; }</code> va <code>.two { margin: 5px 15px 25px; }</code>.',
+
+          hint: 'To‘rtta qiymatni yuqoridan boshlab aylana bo‘ylab o‘qing. Uchta qiymat berilganda qaysi tomonlar bitta qiymatni bo‘lishadi?',
           tests: [
             ['`.one` margini: yuqori `10px`, oʻng `20px`, pastki `30px`, chap `40px`', c => { c.expectMargin('.one', 'top', '10px'); c.expectMargin('.one', 'right', '20px'); c.expectMargin('.one', 'bottom', '30px'); c.expectMargin('.one', 'left', '40px'); }],
             ['`.two` margini: yuqori `5px`, chap va oʻng `15px`, pastki `25px`', c => { c.expectMargin('.two', 'top', '5px'); c.expectMargin('.two', 'right', '15px'); c.expectMargin('.two', 'bottom', '25px'); c.expectMargin('.two', 'left', '15px'); }]
@@ -620,8 +620,8 @@ topics.push({
           task: '<p><code>.box</code> ning kengligi <code>240px</code>. Uni konteyner ichida gorizontal markazga qoʻying.</p>',
           html: '<div class="box">Men markazdaman.</div>',
           css: '.box {\n  width: 240px;\n  padding: 12px;\n  background: #e6ecff;\n  border: 2px solid #2d56f2;\n}\n',
-          solution: '.box {\n  width: 240px;\n  padding: 12px;\n  background: #e6ecff;\n  border: 2px solid #2d56f2;\n  margin: 0 auto;\n}\n',
-          hint: '<code>margin: 0 auto;</code> deb yozing. <code>auto</code> faqat kengligi berilgan blok elementda ishlaydi.',
+
+          hint: 'Blok kengligi berilgan. Qolgan joy chap va o‘ng tomonga teng taqsimlanishi uchun yon masofalar qanday hisoblanishi kerak?',
           tests: [
             ['Quti gorizontal markazda', c => { const r = c.room('.box'); c.assert(r.left > 1 && Math.abs(r.left - r.right) < 1, 'Quti markazda emas: chapda `' + c.n1(r.left) + 'px`, oʻngda `' + c.n1(r.right) + 'px` boʻsh joy bor. Ikkalasi teng boʻlishi kerak.'); }],
             ['Chap va oʻng margin larda `auto` ishlatilgan', c => c.assert(/auto/.test(c.src), 'Chap va oʻng margin larga `auto` bering: `margin: 0 auto;`.')],
@@ -636,8 +636,8 @@ topics.push({
           task: '<p><code>.logout</code> ning kengligi <code>120px</code>. Uni konteynerning oʻng chetiga suring. Faqat chap margin ga <code>auto</code> bering.</p>',
           html: '<div class="logout">Chiqish</div>',
           css: '.logout {\n  width: 120px;\n  padding: 10px;\n  text-align: center;\n  background: #fde5e7;\n  border: 2px solid #c1303c;\n}\n',
-          solution: '.logout {\n  width: 120px;\n  padding: 10px;\n  text-align: center;\n  background: #fde5e7;\n  border: 2px solid #c1303c;\n  margin-left: auto;\n}\n',
-          hint: '<code>.logout</code> qoidasiga <code>margin-left: auto;</code> qoʻshing.',
+
+          hint: 'Blok o‘ngga surilishi uchun bo‘sh joy uning qaysi tomonida yig‘ilishi kerak?',
           tests: [
             ['Quti oʻng chetga taqalgan', c => { const r = c.room('.logout'); c.assert(r.left > 1 && Math.abs(r.right) < 1, 'Quti oʻng chetga taqalmagan: chapda `' + c.n1(r.left) + 'px`, oʻngda `' + c.n1(r.right) + 'px` boʻsh joy bor. Oʻngda `0px` boʻlishi kerak.'); }],
             ['Chap margin da `auto` ishlatilgan', c => c.assert(/auto/.test(c.src), '`margin-left: auto;` deb yozing.')],
@@ -652,8 +652,8 @@ topics.push({
           task: '<p><code>.card</code> ning ichki masofasi <code>20px</code>. <code>.banner</code> ni karta chetlarigacha yoyish uchun uning chap va oʻng margin larini <code>-20px</code> qiling. Yuqori va pastki margin <code>0</code> qolsin.</p>',
           html: '<div class="card">\n  <div class="banner">Maxsus taklif</div>\n  <p>Banner kartaning ikki chetigacha choʻzilgan.</p>\n</div>',
           css: '.card {\n  padding: 20px;\n  background: white;\n  border: 2px solid #2d56f2;\n}\n\n.banner {\n  padding: 10px 20px;\n  background: #2d56f2;\n  color: white;\n  font-weight: bold;\n}\n',
-          solution: '.card {\n  padding: 20px;\n  background: white;\n  border: 2px solid #2d56f2;\n}\n\n.banner {\n  padding: 10px 20px;\n  background: #2d56f2;\n  color: white;\n  font-weight: bold;\n  margin: 0 -20px;\n}\n',
-          hint: '<code>.banner</code> qoidasiga <code>margin: 0 -20px;</code> qoʻshing: yuqori va pastki <code>0</code>, chap va oʻng <code>-20px</code>.',
+
+          hint: 'Ota elementning ichki masofasi bannerni chetdan uzoqlashtirgan. Yon margin qiymatining ishorasi o‘zgarsa nima bo‘ladi?',
           tests: [
             ['`.banner` ning chap va oʻng margini `-20px`', c => { c.expectMargin('.banner', 'left', '-20px'); c.expectMargin('.banner', 'right', '-20px'); }],
             ['Banner kartaning ikki chetigacha yetadi', c => {
@@ -711,8 +711,8 @@ topics.push({
           task: '<p>Hozir <code>.a</code> va <code>.b</code> orasidagi masofa <code>30px</code>. Faqat <code>.b</code> ning <code>margin-top</code> qiymatini oʻzgartirib, oraliqni <code>50px</code> qiling.</p>',
           html: '<div class="box a">.a</div>\n<div class="box b">.b</div>',
           css: '.box {\n  padding: 12px;\n  background: #e6ecff;\n  border: 2px solid #2d56f2;\n}\n\n.a {\n  margin-bottom: 30px;\n}\n\n.b {\n  margin-top: 20px;\n}\n',
-          solution: '.box {\n  padding: 12px;\n  background: #e6ecff;\n  border: 2px solid #2d56f2;\n}\n\n.a {\n  margin-bottom: 30px;\n}\n\n.b {\n  margin-top: 50px;\n}\n',
-          hint: 'Oraliq ikkala margin dan kattasiga teng. <code>50px</code> chiqishi uchun <code>.b</code> ning <code>margin-top</code> i <code>50px</code> boʻlishi kerak.',
+
+          hint: 'Tik yo‘nalishda ikki musbat margin tutashganda kattarog‘i qoladi. Maqsaddagi oraliqni ikkala qiymat bilan solishtiring.',
           tests: [
             ['`.a` va `.b` orasidagi masofa `50px`', c => { const g = c.gap('.a', '.b'); c.assert(Math.abs(g - 50) < 0.6, '`.a` va `.b` orasidagi masofa `' + c.n1(g) + 'px`, lekin `50px` boʻlishi kerak. Vertikal margin lar qoʻshilmaydi: ikkalasidan kattasi olinadi.'); }],
             ['`.b` ning `margin-top` i `50px`', c => c.expectMargin('.b', 'top', '50px')],
@@ -727,8 +727,8 @@ topics.push({
           task: '<p><code>.inner</code> ning <code>margin-top: 30px</code> margini ichkarida qolishi kerak edi, lekin u butun <code>.outer</code> ni pastga suryapti. <code>.outer</code> ga bitta qator qoʻshib buni tuzating. <code>.inner</code> ning margin ini oʻzgartirmang.</p>',
           html: '<div class="outer">\n  <div class="inner">Ichki quti</div>\n</div>',
           css: '.outer {\n  background: #fff3c4;\n}\n\n.inner {\n  margin-top: 30px;\n  padding: 12px;\n  background: #e6ecff;\n  border: 2px solid #2d56f2;\n}\n',
-          solution: '.outer {\n  background: #fff3c4;\n  display: flow-root;\n}\n\n.inner {\n  margin-top: 30px;\n  padding: 12px;\n  background: #e6ecff;\n  border: 2px solid #2d56f2;\n}\n',
-          hint: '<code>.outer</code> qoidasiga <code>display: flow-root;</code> qoʻshing.',
+
+          hint: 'Ichki blokning margini ota qutidan tashqariga chiqmoqda. Ota qutida yangi blok formatlash kontekstini hosil qilish yo‘lini izlang.',
           tests: [
             ['`.inner` `.outer` ichida, uning yuqori chetidan `30px` pastda', c => { const d = c.rect('.inner').top - c.rect('.outer').top; c.assert(d >= 29.5 && d <= 32, '`.inner` `.outer` ning yuqori chetidan `' + c.n1(d) + 'px` pastda. Margin ota-onadan tashqariga chiqib ketyapti. `.outer` ga `display: flow-root;` qoʻshing.'); }],
             ['`.inner` ning `margin-top` i hamon `30px`', c => c.expectMargin('.inner', 'top', '30px')]
@@ -742,8 +742,8 @@ topics.push({
           task: '<p>Qutilar yonma-yon turibdi. <code>.a</code> ning oʻng margini <code>10px</code>. Faqat <code>.b</code> ga <code>margin-left</code> berib, qutilar orasidagi masofani <code>40px</code> qiling.</p>',
           html: '<div class="row">\n  <div class="box a">.a</div>\n  <div class="box b">.b</div>\n</div>',
           css: '.row {\n  display: flex;\n}\n\n.box {\n  padding: 12px;\n  background: #e6ecff;\n  border: 2px solid #2d56f2;\n}\n\n.a {\n  margin-right: 10px;\n}\n\n.b {\n}\n',
-          solution: '.row {\n  display: flex;\n}\n\n.box {\n  padding: 12px;\n  background: #e6ecff;\n  border: 2px solid #2d56f2;\n}\n\n.a {\n  margin-right: 10px;\n}\n\n.b {\n  margin-left: 30px;\n}\n',
-          hint: 'Oraliq <code>10px + margin-left</code> ga teng. <code>40px</code> chiqishi uchun <code>.b</code> ga <code>30px</code> bering.',
+
+          hint: 'Flex qatorida qo‘shni marginlar yig‘iladi. Birinchi qutining hissasini kerakli umumiy oraliqdan ayiring.',
           tests: [
             ['`.a` va `.b` orasidagi masofa `40px`', c => { const g = c.hgap('.a', '.b'); c.assert(Math.abs(g - 40) < 0.6, '`.a` va `.b` orasidagi masofa `' + c.n1(g) + 'px`, lekin `40px` boʻlishi kerak. Gorizontal margin lar qoʻshiladi: `.a` ning oʻng margini (`10px`) ham hisobga oling.'); }],
             ['`.b` ning `margin-left` i `30px`', c => c.expectMargin('.b', 'left', '30px')],
@@ -803,8 +803,8 @@ topics.push({
           task: '<p><code>.tag</code> — <code>span</code> elementi. Unga <code>margin-top: 12px</code> berilgan, lekin u ishlamayapti. <code>.tag</code> ga bitta qator qoʻshib, buni tuzating.</p>',
           html: '<p>Mavzu: <span class="tag">CSS</span> darslari</p>',
           css: '.tag {\n  padding: 2px 10px;\n  background: #2d56f2;\n  color: white;\n  margin-top: 12px;\n}\n',
-          solution: '.tag {\n  padding: 2px 10px;\n  background: #2d56f2;\n  color: white;\n  margin-top: 12px;\n  display: inline-block;\n}\n',
-          hint: '<code>.tag</code> qoidasiga <code>display: inline-block;</code> qoʻshing.',
+
+          hint: 'Satr ichidagi element tik marginni qanday qo‘llaydi? Uni o‘z satrida saqlab, blokdek o‘lchash imkonini beradigan ko‘rsatish turini izlang.',
           tests: [
             ['`.tag` endi `inline` emas', c => c.assert(c.val('.tag', 'display') !== 'inline', '`.tag` hamon `inline`. Vertikal margin ishlashi uchun `display: inline-block;` bering.')],
             ['`.tag` ning `margin-top` i `12px`', c => c.expectMargin('.tag', 'top', '12px')],
@@ -819,8 +819,8 @@ topics.push({
           task: '<p><code>.note</code> ning shrift oʻlchami <code>20px</code>. Unga pastdan <code>1.5em</code> va chapdan <code>10%</code> margin bering.</p>',
           html: '<div class="note">Eslatma: margin turli birliklarda yoziladi.</div>',
           css: '.note {\n  font-size: 20px;\n  padding: 12px;\n  background: #fff3c4;\n  border: 2px solid #d9a400;\n}\n',
-          solution: '.note {\n  font-size: 20px;\n  padding: 12px;\n  background: #fff3c4;\n  border: 2px solid #d9a400;\n  margin-bottom: 1.5em;\n  margin-left: 10%;\n}\n',
-          hint: '<code>margin-bottom: 1.5em;</code> va <code>margin-left: 10%;</code>. Eslatma: <code>%</code> ota-onaning kengligidan hisoblanadi.',
+
+          hint: 'Tik masofani shrift o‘lchamiga, yon masofani esa ota qutining kengligiga bog‘laydigan birliklarni tanlang.',
           tests: [
             ['Pastki margin `1.5em` (`30px`) ga teng', c => c.expectMargin('.note', 'bottom', '30px', '1.5em (30px)')],
             ['Pastki margin `em` birligida yozilgan', c => c.assert(/margin(-bottom)?\s*:[^;}]*\d\.?\d*em/.test(c.src), '`px` oʻrniga `1.5em` deb yozing.')],
@@ -836,8 +836,8 @@ topics.push({
           task: '<p>Sarlavha (<code>.title</code>) va matn (<code>.text</code>) orasida brauzer bergan katta masofa bor. <code>.title</code> ning margin ini <code>0</code> qiling, <code>.text</code> ga esa faqat yuqoridan <code>4px</code> margin bering (qolgan tomonlar <code>0</code>). Natijada ular orasidagi masofa <code>4px</code> boʻlsin.</p>',
           html: '<h2 class="title">Kosmos haqida</h2>\n<p class="text">Venerada kun uning yilidan uzunroq.</p>',
           css: '.title {\n  background: #e6ecff;\n}\n\n.text {\n  background: #fff3c4;\n}\n',
-          solution: '.title {\n  background: #e6ecff;\n  margin: 0;\n}\n\n.text {\n  background: #fff3c4;\n  margin: 4px 0 0;\n}\n',
-          hint: '<code>.title { margin: 0; }</code> va <code>.text { margin: 4px 0 0; }</code>.',
+
+          hint: 'Brauzer sarlavha va paragrafga o‘z marginlarini beradi. Avval qaysi chetlar nol bo‘lishini, keyin kerakli oraliq qayerda qolishini aniqlang.',
           tests: [
             ['`.title` ning margini `0`', c => ['top', 'right', 'bottom', 'left'].forEach(s => c.expectMargin('.title', s, '0px'))],
             ['`.text` ning yuqori margini `4px`, qolgan tomonlari `0`', c => { c.expectMargin('.text', 'top', '4px'); ['right', 'bottom', 'left'].forEach(s => c.expectMargin('.text', s, '0px')); }],
@@ -852,8 +852,8 @@ topics.push({
           task: '<p><code>.menu li</code> elementlariga <code>12px</code> pastki margin berilgan. Oxirgi <code>li</code> ning pastki margin ini <code>0</code> qiling. <code>:last-child</code> dan foydalaning.</p>',
           html: '<ul class="menu">\n  <li>Bosh sahifa</li>\n  <li>Darslar</li>\n  <li>Testlar</li>\n</ul>',
           css: '.menu {\n  margin: 0;\n  padding: 0;\n  list-style: none;\n}\n\n.menu li {\n  margin-bottom: 12px;\n  padding: 8px 12px;\n  background: #e6ecff;\n}\n',
-          solution: '.menu {\n  margin: 0;\n  padding: 0;\n  list-style: none;\n}\n\n.menu li {\n  margin-bottom: 12px;\n  padding: 8px 12px;\n  background: #e6ecff;\n}\n\n.menu li:last-child {\n  margin-bottom: 0;\n}\n',
-          hint: 'Yangi qoida yozing: <code>.menu li:last-child { margin-bottom: 0; }</code>. Uni <code>.menu li</code> qoidasidan <em>keyin</em> yozing.',
+
+          hint: 'Faqat ro‘yxatning oxirgi bandini tanlaydigan psevdosinfni toping. Umumiy qoida bilan maxsus qoida tartibini tekshiring.',
           tests: [
             ['Birinchi ikkita `li` ning pastki margini `12px`', c => { const li = c.qa('.menu li'); c.expectMargin(li[0], 'bottom', '12px'); c.expectMargin(li[1], 'bottom', '12px'); }],
             ['Oxirgi `li` ning pastki margini `0`', c => { const li = c.qa('.menu li'); c.expectMargin(li[li.length - 1], 'bottom', '0px'); }],
@@ -912,7 +912,7 @@ topics.push({
           task: '<ol><li><code>.post</code>: yuqoridan va pastdan <code>24px</code> margin, gorizontal markazda.</li><li><code>.banner</code>: kartaning ikki chetigacha yetsin (kartaning ichki masofasi <code>20px</code>), pastida <code>16px</code> margin. Yuqorida margin yoʻq.</li><li><code>h2</code>: yuqorida <code>0</code>, pastda <code>8px</code> margin. Yon margin lar <code>0</code>.</li><li>Har bir <code>p</code>: yuqorida <code>0</code>, pastda <code>12px</code> margin.</li><li><code>.tag</code>: oʻng tomonida <code>8px</code> masofa.</li><li><code>.more</code> tugmasi kartaning oʻng chetiga taqalsin. Buning uchun uni <code>display: block</code> qiling va <code>margin-left: auto</code> bering.</li></ol>',
           html: '<article class="post">\n  <div class="banner">Yangi maqola</div>\n  <h2>Kosmosga sayohat</h2>\n  <p class="meta"><span class="tag">Fan</span>5 daqiqa oʻqish</p>\n  <p>Venerada kun uning yilidan uzunroq.</p>\n  <p>Marsning ikkita kichik yoʻldoshi bor.</p>\n  <button class="more">Batafsil</button>\n</article>',
           css: '.post {\n  width: 300px;\n  padding: 20px;\n  background: white;\n  border: 2px solid #2d56f2;\n}\n\n.banner {\n  padding: 10px 20px;\n  background: #2d56f2;\n  color: white;\n  font-weight: bold;\n}\n\n.tag {\n  padding: 2px 10px;\n  background: #e6ecff;\n  border-radius: 999px;\n}\n\n.more {\n  padding: 8px 20px;\n  font-size: 15px;\n}\n',
-          solution: '.post {\n  width: 300px;\n  padding: 20px;\n  background: white;\n  border: 2px solid #2d56f2;\n  margin: 24px auto;\n}\n\n.banner {\n  padding: 10px 20px;\n  background: #2d56f2;\n  color: white;\n  font-weight: bold;\n  margin: 0 -20px 16px;\n}\n\n.post h2 {\n  margin: 0 0 8px;\n}\n\n.post p {\n  margin: 0 0 12px;\n}\n\n.tag {\n  padding: 2px 10px;\n  background: #e6ecff;\n  border-radius: 999px;\n  margin-right: 8px;\n}\n\n.more {\n  padding: 8px 20px;\n  font-size: 15px;\n  display: block;\n  margin-left: auto;\n}\n',
+
           hint: 'Roʻyxatni yuqoridan pastga, bir qoidadan keyin ikkinchisiga oʻtib bajaring. Markazlash uchun <code>auto</code>, banner uchun manfiy qiymat, <code>.more</code> uchun esa <code>display: block</code> kerak.',
           tests: [
             ['`.post` ning yuqori va pastki margini `24px`', c => { c.expectMargin('.post', 'top', '24px'); c.expectMargin('.post', 'bottom', '24px'); }],

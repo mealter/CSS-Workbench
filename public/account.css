@@ -10,3 +10,6 @@
 #authMsg{color:var(--bad);min-height:1.5em}
 #resolve{margin:0;padding:10px;background:var(--surface2)}
 
+
+#sync{min-inline-size:min(100%,24ch)}
+@media(max-width:520px){#account{display:grid;grid-template-columns:minmax(0,1fr) auto auto;column-gap:8px}#sync{grid-column:1 / -1;grid-row:2;min-height:1.55em}#logout{grid-column:3;grid-row:1}#importOld{grid-column:1 / -1}}
