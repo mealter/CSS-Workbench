@@ -1,0 +1,12 @@
+#auth{min-height:100%;display:grid;align-content:center;justify-items:center;padding:24px;background:var(--bg)}
+.auth-card{width:min(100%,380px);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:clamp(18px,5vw,32px)}
+.auth-card h1{font:700 1.75rem var(--font-display);margin:.8em 0 .5em}
+.auth-card label{display:block;margin:12px 0 4px;font-weight:500}
+.auth-card input:not([type=checkbox]){width:100%;font:inherit;color:var(--fg);background:var(--code-bg);border:1px solid var(--line-strong);border-radius:6px;padding:9px}
+.auth-card button{margin:6px 4px 0 0}
+#account{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px;padding-block:4px;border-top:1px solid var(--line);font-size:.8rem;color:var(--muted)}
+#account strong{color:var(--fg);overflow-wrap:anywhere}
+#logout{margin-left:auto}
+#authMsg{color:var(--bad);min-height:1.5em}
+#resolve{margin:0;padding:10px;background:var(--surface2)}
+

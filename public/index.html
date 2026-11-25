@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSS Workbench</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a slim top bar whose lesson squares double as progress, then three working panes
+   (task | editor | preview). Borders are the visual language: dashed = not yet, solid = done,
+   outline = you are here. */
+:root{
+  --font-display:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --bg:#f1f3f8;--surface:#ffffff;--surface2:#e8ecf4;--fg:#141a26;--muted:#56617a;--line:#cdd5e3;--line-strong:#8f9bb3;
+  --accent:#2d56f2;--accent-ink:#ffffff;--accent-soft:#e3e9ff;
+  --ok:#0f7f4a;--ok-ink:#ffffff;--ok-soft:#ddf4e7;--bad:#c1303c;--bad-soft:#fde5e7;
+  --code-bg:#f8f9fc;--sel:#b9c8ff;
+  --syn-sel:#1d4ed8;--syn-prop:#0e7a6e;--syn-val:#a4550a;--syn-num:#b4195f;--syn-str:#177a3b;--syn-com:#76829a;--syn-punc:#56617a;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1118;--surface:#151b26;--surface2:#1c2432;--fg:#e7ecf6;--muted:#9aa5bb;--line:#2a3447;--line-strong:#4a5772;
+    --accent:#7894ff;--accent-ink:#0a0f20;--accent-soft:#1d2849;
+    --ok:#45d08c;--ok-ink:#06210f;--ok-soft:#10301f;--bad:#ff7a86;--bad-soft:#3a1a20;
+    --code-bg:#0f141d;--sel:#2c3f78;
+    --syn-sel:#8fb0ff;--syn-prop:#5fd4c2;--syn-val:#f3b663;--syn-num:#ff8fb8;--syn-str:#7fdc9b;--syn-com:#6f7b92;--syn-punc:#9aa5bb;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1118;--surface:#151b26;--surface2:#1c2432;--fg:#e7ecf6;--muted:#9aa5bb;--line:#2a3447;--line-strong:#4a5772;
+    --accent:#7894ff;--accent-ink:#0a0f20;--accent-soft:#1d2849;
+    --ok:#45d08c;--ok-ink:#06210f;--ok-soft:#10301f;--bad:#ff7a86;--bad-soft:#3a1a20;
+    --code-bg:#0f141d;--sel:#2c3f78;
+    --syn-sel:#8fb0ff;--syn-prop:#5fd4c2;--syn-val:#f3b663;--syn-num:#ff8fb8;--syn-str:#7fdc9b;--syn-com:#6f7b92;--syn-punc:#9aa5bb;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--font-body);-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.gx{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+code{font:500 .88em var(--font-mono);background:var(--surface2);padding:.12em .4em;border-radius:5px;overflow-wrap:anywhere}
+
+.app{height:100%;min-height:640px;display:flex;flex-direction:column;min-width:0}
+
+/* ---------- top bar ---------- */
+.topbar{flex:none;background:var(--surface);border-bottom:1px solid var(--line);position:relative;z-index:30}
+.topbar-in{display:flex;align-items:center;gap:14px;padding-block:8px;min-height:54px}
+.brand{display:flex;align-items:center;gap:10px;color:var(--fg);text-decoration:none;font:700 17px/1 var(--font-display);letter-spacing:-.01em;white-space:nowrap}
+.mark{display:block;width:20px;height:20px;border:3px solid var(--accent);border-radius:7px 7px 7px 1px}
+.crumbs{position:relative;min-width:0}
+.crumb-btn{display:flex;align-items:center;gap:8px;min-width:0;max-width:100%;padding:6px 10px;background:transparent;border:2px solid var(--line);border-radius:9px;cursor:pointer;text-align:left}
+.crumb-btn:hover{border-color:var(--line-strong)}
+.crumb-topic{font:500 12px var(--font-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);white-space:nowrap}
+.crumb-lesson{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.chev{flex:none;width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translate(-2px,-2px)}
+.menu{position:absolute;top:calc(100% + 8px);left:0;width:min(380px,calc(100vw - 32px));max-height:min(70vh,520px);overflow:auto;background:var(--surface);border:1px solid var(--line-strong);border-radius:12px;box-shadow:0 14px 36px rgb(10 15 30 / .22);padding:6px}
+.menu-item{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;background:transparent;border:0;border-radius:8px;cursor:pointer;text-align:left}
+.menu-item:hover{background:var(--surface2)}
+.menu-item[aria-current="true"]{background:var(--accent-soft)}
+.menu-sec{padding:10px 10px 4px;font:500 11px var(--font-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.menu-sec:first-child{padding-top:4px}
+.menu-num{flex:none;width:26px;height:26px;display:grid;place-items:center;border:2px dashed var(--line-strong);border-radius:7px;font:500 12px var(--font-mono);color:var(--muted)}
+.menu-num.is-quiz,.mark-n.is-quiz{border-radius:50%}
+.menu-item.done .menu-num,.rowbtn.done .mark-n{border-style:solid;border-color:var(--ok);background:var(--ok);color:var(--ok-ink)}
+.segs{display:flex;align-items:center;gap:14px;margin-left:auto;padding:4px}
+.seggrp{display:flex;align-items:center;gap:5px}
+.seg.is-quiz{border-radius:50%}
+.stepcount{margin-left:auto;font:500 12.5px var(--font-mono);color:var(--muted);white-space:nowrap}
+@media (min-width:1060px){.stepcount{display:none}}
+@media (max-width:1059px){.segs{display:none}}
+.seg{width:18px;height:18px;padding:0;border:2px dashed var(--line-strong);border-radius:5px;background:transparent;cursor:pointer}
+.seg:hover{border-color:var(--fg)}
+.seg.done{border-style:solid;border-color:var(--ok);background:var(--ok)}
+.seg.current{outline:2px solid var(--accent);outline-offset:2px}
+.navbtns{display:flex;gap:4px}
+.iconbtn{width:32px;height:32px;display:grid;place-items:center;background:transparent;border:2px solid var(--line);border-radius:8px;cursor:pointer;font-size:18px;line-height:1}
+.iconbtn:hover:not(:disabled){border-color:var(--line-strong)}
+.iconbtn:disabled{opacity:.35;cursor:default}
+
+/* ---------- home ---------- */
+.home{flex:1;min-height:0;overflow:auto}
+.home-in{max-width:1040px;margin:0 auto;padding-block:44px 64px}
+.hero h1{font:700 clamp(32px,5.2vw,54px)/1.04 var(--font-display);letter-spacing:-.025em;margin:0 0 14px;text-wrap:balance;max-width:16ch}
+.hero p{margin:0;max-width:50ch;font-size:17px;color:var(--muted)}
+.loop{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0 0;padding:0;list-style:none}
+.loop li{border:2px dashed var(--line-strong);border-radius:10px;padding:7px 13px;font:500 13px var(--font-mono)}
+.loop b{color:var(--accent);margin-right:6px}
+.label{font:500 12px var(--font-mono);text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:44px 0 0}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,235px),1fr));gap:16px;margin-top:12px;align-items:start}
+.card{display:flex;flex-direction:column;gap:10px;padding:18px;background:var(--surface);border:2px solid var(--line-strong);border-radius:14px;min-width:0}
+.card h2{font:700 22px/1.15 var(--font-display);margin:0;letter-spacing:-.01em}
+.card p{margin:0;color:var(--muted)}
+.thumb{display:flex;gap:10px;align-items:center;height:42px;color:var(--accent)}
+.thumb i{display:block;width:30px;height:30px}
+.meter{display:flex;gap:3px}
+.meter b{flex:1;height:9px;border:2px solid var(--line-strong);border-radius:3px}
+.meter b.on{background:var(--ok);border-color:var(--ok)}
+.meter b.gap{margin-left:5px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.card .count{font:500 12.5px var(--font-mono);color:var(--muted)}
+.card.planned{border-style:dashed;background:transparent}
+.card.planned h2{color:var(--muted)}
+.tag{align-self:flex-start;font:500 11px var(--font-mono);text-transform:uppercase;letter-spacing:.08em;border:1px solid var(--line-strong);border-radius:999px;padding:2px 9px;color:var(--muted)}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;font:600 14px var(--font-body);background:transparent;border:2px solid var(--line-strong);border-radius:9px;cursor:pointer;white-space:nowrap;text-decoration:none;color:var(--fg)}
+.btn:hover{border-color:var(--fg)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:var(--ok-ink)}
+.btn.small{padding:5px 11px;font-size:13px}
+.btn.confirm{border-color:var(--bad);color:var(--bad)}
+.link{padding:0;background:none;border:0;color:var(--accent);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+/* ---------- lesson layout ---------- */
+.lesson{flex:1;min-height:0;display:flex;flex-direction:column}
+.tabs{display:none}
+.panes{flex:1;min-height:0;display:grid;gap:12px;padding-block:12px;
+  grid-template-columns:minmax(300px,.85fr) minmax(0,1.25fr) minmax(0,1fr);
+  grid-template-areas:"lesson code preview"}
+.pane{min-width:0;min-height:0;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.pane-lesson{grid-area:lesson}
+.pane-code{grid-area:code}
+.pane-preview{grid-area:preview}
+@media (max-width:1099px){
+  .panes{grid-template-columns:minmax(260px,.8fr) minmax(0,1.2fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"lesson code" "lesson preview"}
+}
+@media (max-width:759px){
+  .tabs{display:flex;gap:6px;padding-block:10px 0}
+  .tabs button{flex:1;padding:8px 10px;background:transparent;border:2px solid var(--line);border-radius:9px;font-weight:600;cursor:pointer}
+  .tabs button[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft)}
+  .panes{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);grid-template-areas:"main"}
+  .pane-lesson,.pane-code,.pane-preview{grid-area:main}
+  .lesson[data-tab="lesson"] .pane-code,.lesson[data-tab="lesson"] .pane-preview,
+  .lesson[data-tab="code"] .pane-lesson,.lesson[data-tab="code"] .pane-preview,
+  .lesson[data-tab="preview"] .pane-lesson,.lesson[data-tab="preview"] .pane-code{display:none}
+  .segs,.navbtns{display:none}
+  .crumb-topic{display:none}
+  .topbar-in{gap:10px}
+  .brand span:last-child{display:none}
+}
+
+/* ---------- lesson pane ---------- */
+.scroll{flex:1;min-height:0;overflow:auto;padding:20px 22px 28px}
+.step-no{margin:0;font:500 12px var(--font-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.lesson-title{font:700 27px/1.12 var(--font-display);letter-spacing:-.015em;margin:6px 0 14px;text-wrap:balance}
+.prose p{margin:0 0 12px;max-width:62ch}
+.prose ul{margin:0 0 12px;padding-left:20px;max-width:62ch}
+.prose li{margin-bottom:4px}
+.ex{margin:0 0 16px;padding:12px 14px;background:var(--code-bg);border:1px solid var(--line);border-radius:8px;font:13.5px/1.65 var(--font-mono);overflow:auto;white-space:pre;tab-size:2}
+.task{margin:0 0 22px;padding:12px 16px;border:2px dashed var(--accent);border-radius:10px;background:var(--accent-soft)}
+.task-label{margin:0 0 4px;font:500 12px var(--font-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+.task p,.task ol,.task ul{margin:0 0 6px;max-width:62ch}
+.task ol,.task ul{padding-left:20px}
+.task li{margin-bottom:4px}
+.task code{background:var(--surface)}
+.sec-label{margin:0 0 8px;font:500 12px var(--font-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.checks{list-style:none;margin:0 0 16px;padding:0;display:flex;flex-direction:column;gap:6px}
+.checks.stale .check{opacity:.55}
+.check{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+.check .ico{flex:none;width:20px;height:20px;margin-top:1px;border-radius:50%;border:2px dashed var(--line-strong);display:grid;place-items:center;font:700 11px/1 var(--font-body)}
+.check[data-s="pass"]{border-color:var(--ok);background:var(--ok-soft)}
+.check[data-s="pass"] .ico{border:0;background:var(--ok);color:var(--ok-ink)}
+.check[data-s="pass"] .ico::before{content:"\2713"}
+.check[data-s="fail"]{border-color:var(--bad);background:var(--bad-soft)}
+.check[data-s="fail"] .ico{border:0;background:var(--bad);color:#fff}
+.check[data-s="fail"] .ico::before{content:"\2715"}
+.ct{min-width:0;font-size:14px}
+.why{display:block;margin-top:5px;color:var(--bad);font-size:13.5px}
+.helpers{display:flex;gap:18px;flex-wrap:wrap;margin:0 0 10px}
+.reveal{margin:0 0 14px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.reveal p{margin:0 0 8px;max-width:60ch}
+.reveal .ex{margin-bottom:10px}
+.done-box{margin:0 0 16px;padding:12px 14px;border:2px solid var(--ok);border-radius:10px;background:var(--ok-soft);font-weight:600}
+
+/* ---------- editor ---------- */
+.pane-head{flex:none;display:flex;align-items:center;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line);background:var(--surface2)}
+.pane-head .grow{flex:1}
+.ftab{padding:5px 10px;font:500 13px var(--font-mono);background:transparent;border:1px solid transparent;border-radius:7px;color:var(--muted);cursor:pointer}
+.ftab[aria-selected="true"]{background:var(--surface);border-color:var(--line);color:var(--fg)}
+.ro{font:500 11px var(--font-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding-right:6px}
+.editor{flex:1;min-height:0;display:flex;background:var(--code-bg);font:14px/1.65 var(--font-mono);overflow:hidden;font-variant-ligatures:none}
+.gutter{flex:none;width:44px;overflow:hidden;border-right:1px solid var(--line);color:var(--muted);text-align:right;user-select:none}
+.gut-in{padding:12px 10px 12px 0;white-space:pre;font:inherit}
+.code-wrap{position:relative;flex:1;min-width:0}
+.hl,.ta{position:absolute;inset:0;margin:0;padding:12px 16px;border:0;font:inherit;line-height:inherit;letter-spacing:0;white-space:pre;tab-size:2;-moz-tab-size:2;font-variant-ligatures:none}
+.hl{overflow:hidden;pointer-events:none;color:var(--fg)}
+.hl code{display:block;background:none;padding:0;border-radius:0;font:inherit;overflow:visible}
+.ta{resize:none;overflow:auto;background:transparent;color:transparent;-webkit-text-fill-color:transparent;caret-color:var(--fg);outline:none}
+.ta::selection{background:var(--sel);color:transparent;-webkit-text-fill-color:transparent}
+.htmlview{flex:1;min-height:0;margin:0;padding:12px 16px;overflow:auto;background:var(--code-bg);font:14px/1.65 var(--font-mono);white-space:pre;tab-size:2;color:var(--fg)}
+.kbd-hint{flex:none;margin:0;padding:6px 12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.t-sel{color:var(--syn-sel)}.t-prop{color:var(--syn-prop)}.t-val{color:var(--syn-val)}.t-num{color:var(--syn-num)}
+.t-str{color:var(--syn-str)}.t-com{color:var(--syn-com);font-style:italic}.t-pun{color:var(--syn-punc)}.t-at{color:var(--syn-num)}
+.t-tag{color:var(--syn-sel)}.t-attr{color:var(--syn-val)}
+
+/* ---------- preview ---------- */
+.seg-ctl{display:flex;gap:4px}
+.viewport{position:relative;flex:1;min-height:0;background:#ffffff}
+.preview-host{position:absolute;inset:0;display:block;contain:layout paint}
+.test-host{position:fixed;left:-10000px;top:0;width:560px;height:420px;contain:layout paint;pointer-events:none}
+
+/* ---------- action bar ---------- */
+.actionbar{flex:none;background:var(--surface);border-top:1px solid var(--line)}
+.actionbar-in{display:flex;align-items:center;gap:12px;padding-block:10px}
+.status{flex:1;min-width:0;padding:0;background:none;border:0;text-align:left;font-size:14px;color:var(--muted);cursor:pointer}
+.status[data-s="pass"]{color:var(--ok);font-weight:600}
+.status[data-s="fail"]{color:var(--bad);font-weight:600}
+@media (prefers-reduced-motion: no-preference){
+  .btn,.seg,.menu-item,.card{transition:border-color .12s,background-color .12s}
+}
+
+/* ---------- topic overview ---------- */
+.tv-in{max-width:820px;margin:0 auto;padding-block:30px 64px}
+.back{display:inline-block;margin-bottom:18px;color:var(--muted);font-weight:600;text-decoration:none}
+.back:hover{color:var(--fg)}
+.tv-in h1{margin:0 0 8px;font:700 clamp(28px,4.4vw,42px)/1.08 var(--font-display);letter-spacing:-.02em}
+.tv-in .lede{margin:0 0 16px;max-width:58ch;color:var(--muted);font-size:16px}
+.tv-bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px}
+.tv-bar .count{font:500 13px var(--font-mono);color:var(--muted)}
+.sec{margin-top:22px;border:2px solid var(--line-strong);border-radius:14px;background:var(--surface);overflow:hidden}
+.sec-head{padding:14px 18px 12px;border-bottom:1px solid var(--line)}
+.sec-no{margin:0;font:500 12px var(--font-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.sec-title{margin:2px 0 2px;font:700 21px/1.2 var(--font-display);letter-spacing:-.01em}
+.sec-blurb{margin:0;color:var(--muted)}
+.rows{list-style:none;margin:0;padding:6px}
+.rowbtn{display:flex;align-items:center;gap:12px;width:100%;padding:9px 12px;background:none;border:0;border-radius:8px;cursor:pointer;text-align:left}
+.rowbtn:hover{background:var(--surface2)}
+.mark-n{flex:none;width:28px;height:28px;display:grid;place-items:center;border:2px dashed var(--line-strong);border-radius:7px;font:500 12px var(--font-mono);color:var(--muted)}
+.rowtitle{min-width:0;font-weight:500}
+.rowkind{margin-left:auto;flex:none;font:500 11px var(--font-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+
+/* ---------- quiz ---------- */
+.quiz{flex:1;min-height:0;display:flex;flex-direction:column}
+.quiz-scroll{flex:1;min-height:0;overflow:auto}
+.quiz-in{max-width:760px;margin:0 auto;padding-block:24px 36px}
+.quiz-in .lesson-title{margin-bottom:8px}
+.quiz-intro{margin:0 0 20px;max-width:60ch;color:var(--muted)}
+.q{margin:0 0 16px;padding:16px 18px;background:var(--surface);border:2px solid var(--line);border-radius:12px}
+.q[data-s="ok"]{border-color:var(--ok)}
+.q[data-s="bad"],.q[data-s="none"]{border-color:var(--bad)}
+.q-head{display:flex;gap:12px;align-items:baseline;margin:0 0 12px}
+.q-no{flex:none;font:500 12px var(--font-mono);color:var(--muted)}
+.q-text{margin:0;font-weight:600;font-size:16px;min-width:0}
+.q .ex{margin:0 0 12px}
+.opts{display:grid;gap:8px}
+.opt{position:relative;display:flex;gap:10px;align-items:flex-start;padding:9px 12px;background:var(--surface);border:2px solid var(--line);border-radius:10px;cursor:pointer}
+.opt:hover{border-color:var(--line-strong)}
+.opt input{position:absolute;opacity:0;width:1px;height:1px}
+.opt-mark{flex:none;width:18px;height:18px;margin-top:2px;border:2px dashed var(--line-strong);border-radius:50%}
+.opt-text{min-width:0;overflow-wrap:anywhere}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft)}
+.opt.sel .opt-mark{border-style:solid;border-color:var(--accent);background:radial-gradient(circle,var(--accent) 0 38%,transparent 42%)}
+.opt input:focus-visible ~ .opt-mark{outline:3px solid var(--accent);outline-offset:2px}
+.q[data-s="bad"] .opt.sel{border-color:var(--bad);background:var(--bad-soft)}
+.q[data-s="bad"] .opt.sel .opt-mark{border-color:var(--bad);background:radial-gradient(circle,var(--bad) 0 38%,transparent 42%)}
+.q[data-s="ok"] .opt.sel{border-color:var(--ok);background:var(--ok-soft)}
+.q[data-s="ok"] .opt.sel .opt-mark{border-color:var(--ok);background:radial-gradient(circle,var(--ok) 0 38%,transparent 42%)}
+.q-fb{margin:12px 0 0;font-size:14px;max-width:62ch}
+.q[data-s="ok"] .q-fb strong{color:var(--ok)}
+.q[data-s="bad"] .q-fb strong,.q[data-s="none"] .q-fb strong{color:var(--bad)}
+.quiz .status{cursor:default;margin:0}
+
+@media (min-width:640px){.card:not(.planned){grid-column:span 2}}
+
+</style>
+
+<style>[hidden]{display:none!important}</style>
+<link rel="stylesheet" href="account.css">
+</head>
+<body>
+<main id="auth"><form id="credentials" class="auth-card" novalidate>
+<strong>CSS Workbench</strong><h1 id="authTitle">Tizimga kirish</h1>
+<label for="username">Foydalanuvchi nomi</label><input id="username" autocomplete="username" required pattern="[A-Za-z][A-Za-z0-9_]{2,31}" title="3–32 ta belgi. Lotin harfi bilan boshlang. Harf, raqam va pastki chiziq ishlating.">
+<label for="password">Parol</label><input id="password" type="password" autocomplete="current-password" required minlength="8" maxlength="128">
+<div id="repeat" hidden><label for="confirmation">Parolni tasdiqlash</label><input id="confirmation" type="password" autocomplete="new-password"></div>
+<label><input type="checkbox" id="visible"> Parolni ko‘rsatish</label>
+<p id="authMsg" role="status"></p><button class="btn primary" id="submitAuth">Tizimga kirish</button>
+<button class="btn" type="button" id="switchAuth">Ro‘yxatdan o‘tish</button></form></main>
+<div hidden class="app" id="app" lang="uz">
+  <header class="topbar">
+    <div class="topbar-in gx">
+      <a class="brand" href="#home" aria-label="CSS Workbench: bosh sahifa"><span class="mark" aria-hidden="true"></span><span>CSS Workbench</span></a>
+      <div class="crumbs" id="crumbs" hidden>
+        <button type="button" class="crumb-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menu">
+          <span class="crumb-topic" id="crumbTopic"></span>
+          <span class="crumb-lesson" id="crumbLesson"></span>
+          <span class="chev" aria-hidden="true"></span>
+        </button>
+        <div class="menu" id="menu" hidden></div>
+      </div>
+      <div class="segs" id="segs" role="group" aria-label="Qadamlar" hidden></div>
+      <span class="stepcount" id="stepCount" hidden></span>
+      <div class="navbtns" id="navBtns" hidden>
+        <button type="button" class="iconbtn" id="prevBtn" aria-label="Oldingi qadam">&#8249;</button>
+        <button type="button" class="iconbtn" id="nextBtn" aria-label="Keyingi qadam">&#8250;</button>
+      </div>
+    </div>
+    <div id="account" class="gx"><strong id="who"></strong><span id="percent"></span><span id="sync" role="status"></span><button hidden id="importOld" class="btn small">Eski natijalarni import qilish</button><button class="btn small" id="logout">Chiqish</button></div>
+    <div hidden id="resolve"><span id="conflictText"></span> <button id="keepLocal" class="btn small">Shu qurilmadagi nusxani saqlash</button> <button id="useCloud" class="btn small">Bulutdagi nusxani olish</button></div>
+  </header>
+
+  <main class="home" id="home"></main>
+  <main class="home" id="topicView" hidden></main>
+
+  <section class="lesson" id="lesson" data-tab="lesson" hidden>
+    <div class="tabs gx" role="tablist" aria-label="Panellar">
+      <button type="button" role="tab" data-tab="lesson" aria-selected="true">Dars</button>
+      <button type="button" role="tab" data-tab="code" aria-selected="false">Kod</button>
+      <button type="button" role="tab" data-tab="preview" aria-selected="false">Natija</button>
+    </div>
+
+    <div class="panes gx">
+      <section class="pane pane-lesson" aria-label="Dars">
+        <div class="scroll" id="lessonScroll"></div>
+      </section>
+
+      <section class="pane pane-code" aria-label="Kod">
+        <div class="pane-head">
+          <button type="button" class="ftab" id="tabCss" role="tab" aria-selected="true">styles.css</button>
+          <button type="button" class="ftab" id="tabHtml" role="tab" aria-selected="false">index.html</button>
+          <span class="grow"></span>
+          <span class="ro" id="roLabel" hidden>faqat oʻqish uchun</span>
+          <button type="button" class="btn small" id="resetBtn">Tiklash</button>
+        </div>
+        <div class="editor" id="editor">
+          <div class="gutter" aria-hidden="true"><div class="gut-in" id="gutIn">1</div></div>
+          <div class="code-wrap">
+            <pre class="hl" aria-hidden="true"><code id="hl"></code></pre>
+            <textarea class="ta" id="ta" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label="CSS kod muharriri"></textarea>
+          </div>
+        </div>
+        <pre class="htmlview" id="htmlView" tabindex="0" aria-label="Bu darsning HTML kodi (faqat oʻqish uchun)" hidden></pre>
+        <p class="kbd-hint">Tab — chekinish. Muharrirdan chiqish uchun Esc, keyin Tab bosing. Ctrl+Enter — tekshirish.</p>
+      </section>
+
+      <section class="pane pane-preview" aria-label="Natija">
+        <div class="pane-head">
+          <div class="seg-ctl" role="tablist" aria-label="Natija rejimi">
+            <button type="button" class="ftab" id="tabYou" role="tab" aria-selected="true">Sizning natijangiz</button>
+            <button type="button" class="ftab" id="tabGoal" role="tab" aria-selected="false">Maqsad</button>
+          </div>
+        </div>
+        <div class="viewport">
+          <div class="preview-host" id="hostYou" role="img" aria-label="Sizning natijangiz koʻrinishi"></div>
+          <div class="preview-host" id="hostGoal" role="img" aria-label="Maqsad koʻrinishi" hidden></div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="actionbar">
+      <div class="actionbar-in gx">
+        <button type="button" class="status" id="status" data-s="idle" aria-live="polite"></button>
+        <button type="button" class="btn primary" id="checkBtn">Kodni tekshirish</button>
+      </div>
+    </footer>
+  </section>
+
+  <section class="quiz" id="quiz" hidden>
+    <div class="quiz-scroll" id="quizScroll"><div class="gx" id="quizIn"></div></div>
+    <footer class="actionbar">
+      <div class="actionbar-in gx">
+        <p class="status" id="qStatus" data-s="idle" aria-live="polite"></p>
+        <button type="button" class="btn primary" id="qBtn">Javoblarni tekshirish</button>
+      </div>
+    </footer>
+  </section>
+</div>
+
+<script src="curriculum.js"></script>
+<script src="account.js"></script>
+<script>
+(function () {
+'use strict';
+
+/* ===== Sozlamalar =====
+   SHOW_SOLUTIONS = false qilsangiz, oʻquvchilarga "Yechimni koʻrsatish" tugmasi chiqmaydi. */
+const SHOW_SOLUTIONS = true;
+const STORE_KEY = 'cssworkbench.v1';
+const TOPICS = window.TOPICS || [];
+const PLANNED = [
+  { title: 'Ichki masofa', blurb: 'padding: quti chegarasi bilan mazmun orasidagi boʻshliq.' },
+  { title: 'Ranglar va fonlar', blurb: 'Rang nomlari, hex, rgb() va gradientlar.' },
+  { title: 'Flexbox', blurb: 'Qator, ustun va tekislash.' }
+];
+
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const fmt = s => esc(s).replace(/`([^`]+)`/g, '<code>$1</code>');
+const keyOf = (t, st) => t.id + '/' + st.id;
+
+/* ===== Mavzularni tekis qadamlar roʻyxatiga aylantirish ===== */
+TOPICS.forEach(T => {
+  T.steps = []; T.lessonCount = 0; T.quizCount = 0;
+  T.sections.forEach((S, si) => S.steps.forEach(st => {
+    st.section = si;
+    st.type = st.questions ? 'quiz' : 'lesson';
+    if (st.type === 'lesson') st.no = ++T.lessonCount; else T.quizCount++;
+    T.steps.push(st);
+  }));
+});
+
+/* ===== Saqlangan natijalar (shu brauzerda) ===== */
+let store = { done: {}, code: {}, answers: {} };
+function saveStore(now) { account.changed(now); }
+
+/* ===== Sintaksis boʻyoqlari ===== */
+const span = (c, t) => t ? '<span class="' + c + '">' + esc(t) + '</span>' : '';
+const VAL_RE = /\s+|"[^"]*"?|'[^']*'?|#[0-9a-fA-F]{3,8}\b|-?(?:\d+\.?\d*|\.\d+)(?:%|[a-zA-Z]+)?|!important|[a-zA-Z_-][\w-]*|[\s\S]/y;
+
+function hlSel(seg) {
+  if (/^\s*@/.test(seg)) return esc(seg).replace(/^(\s*)(@[\w-]+)/, '$1<span class="t-at">$2</span>');
+  return seg.replace(/(\/\*[\s\S]*?\*\/)|(\.[\w-]+|#[\w-]+)|(::?[\w-]+(?:\([^)]*\))?)|([a-zA-Z][\w-]*)|(\[[^\]]*\])|([\s\S])/g,
+    (m, com, sel, ps, tag, attr, other) => com ? span('t-com', com) : sel ? span('t-sel', sel) : ps ? span('t-prop', ps) : tag ? span('t-sel', tag) : attr ? span('t-val', attr) : span('t-pun', other));
+}
+
+function hlCSS(src, declsOnly) {
+  let out = '', i = 0, depth = declsOnly ? 1 : 0, mode = declsOnly ? 'prop' : 'sel';
+  const n = src.length;
+  while (i < n) {
+    const ch = src[i];
+    if (ch === '/' && src[i + 1] === '*') { let j = src.indexOf('*/', i + 2); j = j < 0 ? n : j + 2; out += span('t-com', src.slice(i, j)); i = j; continue; }
+    if (ch === '{') { depth++; mode = 'prop'; out += span('t-pun', ch); i++; continue; }
+    if (ch === '}') { depth = Math.max(0, depth - 1); mode = depth ? 'prop' : 'sel'; out += span('t-pun', ch); i++; continue; }
+    if (/\s/.test(ch)) { out += ch; i++; continue; }
+    if (mode === 'val') {
+      if (ch === ';') { out += span('t-pun', ch); mode = 'prop'; i++; continue; }
+      VAL_RE.lastIndex = i;
+      const t = VAL_RE.exec(src)[0];
+      i += t.length;
+      if (t[0] === '"' || t[0] === "'") out += span('t-str', t);
+      else if (t[0] === '#' || /^-?(\d|\.\d)/.test(t)) out += span('t-num', t);
+      else if (t === '!important') out += span('t-at', t);
+      else if (/^[a-zA-Z_-]/.test(t)) out += span(src[i] === '(' ? 't-prop' : 't-val', t);
+      else out += span('t-pun', t);
+      continue;
+    }
+    const rest = src.slice(i);
+    const k = rest.search(/[;{}]/);
+    if (mode === 'sel') {
+      const end = rest.search(/[{}]/);
+      const seg = end < 0 ? rest : rest.slice(0, end);
+      out += hlSel(seg); i += seg.length; continue;
+    }
+    // mode === 'prop'
+    if (ch === ';') { out += span('t-pun', ch); i++; continue; }
+    if (k >= 0 && rest[k] === '{') { const seg = rest.slice(0, k); out += hlSel(seg); i += seg.length; continue; }
+    const colon = rest.indexOf(':');
+    const end = (colon >= 0 && (k < 0 || colon < k)) ? colon : (k < 0 ? rest.length : k);
+    const name = rest.slice(0, end), trimmed = name.replace(/\s+$/, '');
+    out += span('t-prop', trimmed) + name.slice(trimmed.length);
+    i += end;
+    if (src[i] === ':') { out += span('t-pun', ':'); mode = 'val'; i++; }
+  }
+  return out;
+}
+
+function hlHTML(src) {
+  return src.replace(/<!--[\s\S]*?-->|<\/?[a-zA-Z][^>]*>|[^<]+|</g, tok => {
+    if (tok.slice(0, 4) === '<!--') return span('t-com', tok);
+    const m = /^<(\/?)([a-zA-Z][\w-]*)([\s\S]*?)(\/?)>$/.exec(tok);
+    if (!m) return esc(tok);
+    const attrs = esc(m[3]).replace(/([\w:-]+)(=)("[^"]*")/g, '<span class="t-attr">$1</span>$2<span class="t-str">$3</span>');
+    return '<span class="t-pun">&lt;' + m[1] + '</span><span class="t-tag">' + m[2] + '</span>' + attrs + '<span class="t-pun">' + m[4] + '&gt;</span>';
+  });
+}
+
+/* ===== Natija oynasi (shadow DOM oʻquvchi CSS ini sahifadan ajratib turadi) ===== */
+const BASE_CSS =
+  ':host{all:initial}' +
+  '.stage{position:absolute;inset:0;overflow:auto;padding:16px;background:#fff;color:#1b1f24;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}';
+
+function stripComments(css) { return css.replace(/\/\*[\s\S]*?\*\//g, ''); }
+
+// Oʻquvchi CSS idagi body, html va :root natija oynasining oʻziga qaratiladi.
+function scopeCss(css) {
+  return stripComments(css).replace(/([^{}]+)\{/g, (m, sel) => {
+    if (sel.trim().charAt(0) === '@') return m;
+    const out = sel.replace(/(^|[\s,>+~(])(html|body|:root)(?![\w-])/gi, '$1.stage').replace(/\.stage(\s*>?\s*)\.stage/g, '.stage');
+    return out + '{';
+  });
+}
+
+function renderInto(host, html, css) {
+  const root = host.shadowRoot || host.attachShadow({ mode: 'open' });
+  const base = document.createElement('style'); base.textContent = BASE_CSS;
+  const user = document.createElement('style'); user.textContent = scopeCss(css);
+  const stage = document.createElement('div'); stage.className = 'stage'; stage.innerHTML = html;
+  root.replaceChildren(base, user, stage);
+}
+
+/* ===== Avtomatik tekshiruvlar ===== */
+const SIDES = ['top', 'right', 'bottom', 'left'];
+const CORNERS = ['top-left', 'top-right', 'bottom-right', 'bottom-left'];
+const SIDE_UZ = { top: 'yuqori', right: 'oʻng', bottom: 'pastki', left: 'chap' };
+const CORNER_UZ = { 'top-left': 'yuqori chap', 'top-right': 'yuqori oʻng', 'bottom-right': 'pastki oʻng', 'bottom-left': 'pastki chap' };
+const PROP_UZ = { width: 'qalinligi', style: 'uslubi', color: 'rangi' };
+const probe = document.createElement('span');
+function normColor(c) {
+  probe.style.color = ''; probe.style.color = c;
+  if (!probe.style.color) return c;
+  document.body.appendChild(probe);
+  const out = getComputedStyle(probe).color;
+  probe.remove();
+  return out;
+}
+
+function makeCtx(root, src) {
+  const tk = s => '`' + s + '`';
+  const fail = m => { throw new Error(m); };
+  const q = sel => root.querySelector(sel) || fail('Natija oynasida ' + tk(sel) + ' topilmadi. Selektor va HTML ni oʻzgartirmang.');
+  const qa = sel => { const l = Array.from(root.querySelectorAll(sel)); return l.length ? l : fail('Natija oynasida ' + tk(sel) + ' topilmadi.'); };
+  const toEl = x => typeof x === 'string' ? q(x) : x;
+  const val = (x, prop) => getComputedStyle(toEl(x)).getPropertyValue(prop).trim();
+  const side = (x, s, p) => val(x, 'border-' + s + '-' + p);
+  const nameOf = x => typeof x === 'string' ? x : (x.className ? '.' + String(x.className).split(' ')[0] : x.tagName.toLowerCase());
+  function expectSide(x, s, p, want, label) {
+    const got = side(x, s, p);
+    const w = p === 'color' ? normColor(want) : want;
+    if (got !== w) {
+      let m = tk(nameOf(x)) + ' elementining ' + SIDE_UZ[s] + ' chegarasining ' + PROP_UZ[p] + ' ' + tk(got) + ', lekin ' + tk(label || want) + ' boʻlishi kerak.';
+      if (p === 'width' && got === '0px') m += ' Chegara faqat `border-style` qiymati `none` boʻlmaganda koʻrinadi.';
+      fail(m);
+    }
+  }
+  function radius(x, k) {
+    const raw = val(x, 'border-' + k + '-radius').split(' ')[0];
+    return { raw: raw, n: parseFloat(raw) || 0, unit: raw.slice(-1) === '%' ? '%' : 'px' };
+  }
+  function expectCorner(x, k, want) {
+    const got = radius(x, k).raw;
+    if (got !== want) fail(tk(nameOf(x)) + ' elementining ' + CORNER_UZ[k] + ' burchagining radiusi ' + tk(got) + ', lekin ' + tk(want) + ' boʻlishi kerak.');
+  }
+  const pf = v => parseFloat(v) || 0;
+  const rect = x => toEl(x).getBoundingClientRect();
+  function room(x) {
+    const el = toEl(x), p = el.parentElement, r = el.getBoundingClientRect(), pr = p.getBoundingClientRect(), cs = getComputedStyle(p);
+    return {
+      left: r.left - (pr.left + pf(cs.borderLeftWidth) + pf(cs.paddingLeft)),
+      right: (pr.right - pf(cs.borderRightWidth) - pf(cs.paddingRight)) - r.right
+    };
+  }
+  function parentWidth(x) { const p = toEl(x).parentElement, cs = getComputedStyle(p); return p.clientWidth - pf(cs.paddingLeft) - pf(cs.paddingRight); }
+  function expectMargin(x, s, want, label) {
+    const got = val(x, 'margin-' + s);
+    if (got !== want) fail(tk(nameOf(x)) + ' elementining ' + SIDE_UZ[s] + ' margini ' + tk(got) + ', lekin ' + tk(label || want) + ' boʻlishi kerak.');
+  }
+  return {
+    src: src, CORNERS: CORNERS,
+    rect: rect, room: room, parentWidth: parentWidth,
+    gap: (a, b) => rect(b).top - rect(a).bottom,
+    hgap: (a, b) => rect(b).left - rect(a).right,
+    n1: v => Math.round(v * 10) / 10,
+    expectMargin: expectMargin,
+    allMargins: (x, want) => SIDES.forEach(s => expectMargin(x, s, want)), q: q, qa: qa, val: val, side: side, radius: radius,
+    px: v => parseFloat(v) || 0,
+    color: normColor,
+    assert: (cond, msg) => { if (!cond) fail(msg); },
+    expectSide: expectSide,
+    expectCorner: expectCorner,
+    allSides: (x, p, want, label) => SIDES.forEach(s => expectSide(x, s, p, want, label)),
+    allCorners: (x, want) => CORNERS.forEach(k => expectCorner(x, k, want))
+  };
+}
+
+function runTests(lesson, css) {
+  const host = document.createElement('div');
+  host.className = 'test-host';
+  host.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(host);
+  try {
+    renderInto(host, lesson.html, css);
+    const ctx = makeCtx(host.shadowRoot, stripComments(css));
+    return lesson.tests.map(t => {
+      try { t[1](ctx); return { ok: true }; }
+      catch (e) { return { ok: false, msg: e && e.message ? e.message : String(e) }; }
+    });
+  } catch (e) {
+    return lesson.tests.map(() => ({ ok: false, msg: 'CSS kodingizdagi xato tekshiruvni toʻxtatdi.' }));
+  } finally { host.remove(); }
+}
+
+/* ===== Holat va elementlar ===== */
+const state = { view: 'home', topic: null, idx: 0, result: null, stale: false, tab: 'lesson', file: 'css', mode: 'you', answers: [], qres: null };
+const homeEl = $('#home'), topicEl = $('#topicView'), lessonEl = $('#lesson'), quizEl = $('#quiz');
+const VIEWS = { home: homeEl, topic: topicEl, lesson: lessonEl, quiz: quizEl };
+const ta = $('#ta'), hlEl = $('#hl'), gutIn = $('#gutIn');
+const step = () => state.topic.steps[state.idx];
+const isDone = (t, st) => !!store.done[keyOf(t, st)];
+const stepName = st => st.type === 'quiz' ? st.title : st.no + '. ' + st.title;
+const doneCount = T => T.steps.filter(s => isDone(T, s)).length;
+
+function show(v) {
+  state.view = v;
+  Object.keys(VIEWS).forEach(k => { VIEWS[k].hidden = k !== v; });
+  const inStep = v === 'lesson' || v === 'quiz';
+  ['crumbs', 'segs', 'navBtns', 'stepCount'].forEach(id => { $('#' + id).hidden = !inStep; });
+  closeMenu();
+}
+
+/* ===== Bosh sahifa ===== */
+function renderHome() {
+  show('home');
+  document.title = 'CSS Workbench';
+  const cards = TOPICS.map(T => {
+    const done = doneCount(T), total = T.steps.length;
+    const next = Math.max(0, T.steps.findIndex(s => !isDone(T, s)));
+    const start = done === total ? 0 : next;
+    const label = done === 0 ? 'Boshlash' : done === total ? 'Qayta koʻrish' : 'Davom etish';
+    return '<article class="card"><div class="thumb" aria-hidden="true">' + (T.thumb || '') + '</div>' +
+      '<h2>' + esc(T.title) + '</h2><p>' + esc(T.blurb) + '</p>' +
+      '<div class="count">' + T.sections.length + ' boʻlim · ' + T.lessonCount + ' dars · ' + T.quizCount + ' test</div>' +
+      '<div class="meter" aria-hidden="true">' + T.steps.map((s, i) => '<b class="' + (isDone(T, s) ? 'on' : '') + (i > 0 && s.section !== T.steps[i - 1].section ? ' gap' : '') + '"></b>').join('') + '</div>' +
+      '<div class="count">' + total + ' qadamdan ' + done + ' tasi bajarildi</div>' +
+      '<div class="btnrow"><a class="btn primary" href="#' + T.id + '-' + (start + 1) + '" data-topic="' + T.id + '" data-i="' + start + '">' + label + '</a>' +
+      '<a class="btn" href="#' + T.id + '" data-overview="' + T.id + '">Boʻlimlar</a></div></article>';
+  }).join('');
+  const planned = PLANNED.map(p => '<article class="card planned"><span class="tag">Rejalashtirilgan</span><h2>' + esc(p.title) + '</h2><p>' + esc(p.blurb) + '</p></article>').join('');
+  homeEl.innerHTML = '<div class="gx"><div class="home-in">' +
+    '<section class="hero"><h1>CSS ni yozib oʻrganing.</h1>' +
+    '<p>Qisqa darslar, haqiqiy kod va tezkor tekshiruv. Har bir darsda topshiriq, jonli natija va CSS kodingiz bajarishi kerak boʻlgan shartlar roʻyxati bor. Har bir boʻlim test bilan yakunlanadi.</p>' +
+    '<ol class="loop"><li><b>1</b>Topshiriqni oʻqing</li><li><b>2</b>CSS yozing</li><li><b>3</b>Tekshiring</li></ol></section>' +
+    '<h2 class="label">Mavzular</h2><div class="cards">' + cards + planned + '</div></div></div>';
+  $$('a[data-topic]', homeEl).forEach(a => a.addEventListener('click', ev => { ev.preventDefault(); go(TOPICS.find(t => t.id === a.dataset.topic), +a.dataset.i); }));
+  $$('a[data-overview]', homeEl).forEach(a => a.addEventListener('click', ev => { ev.preventDefault(); goTopic(TOPICS.find(t => t.id === a.dataset.overview)); }));
+}
+
+/* ===== Mavzu sahifasi (boʻlimlar roʻyxati) ===== */
+function renderTopic(T) {
+  show('topic');
+  state.topic = T;
+  document.title = 'CSS Workbench';
+  const done = doneCount(T), total = T.steps.length;
+  const next = Math.max(0, T.steps.findIndex(s => !isDone(T, s)));
+  const start = done === total ? 0 : next;
+  const label = done === 0 ? 'Boshlash' : done === total ? 'Qayta koʻrish' : 'Davom etish';
+  const secs = T.sections.map((S, si) => {
+    const items = T.steps.map((st, i) => ({ st: st, i: i })).filter(x => x.st.section === si);
+    const d = items.filter(x => isDone(T, x.st)).length;
+    return '<section class="sec"><div class="sec-head"><p class="sec-no">' + (si + 1) + '-boʻlim · ' + d + ' / ' + items.length + '</p>' +
+      '<h2 class="sec-title">' + esc(S.title) + '</h2><p class="sec-blurb">' + esc(S.blurb) + '</p></div><ul class="rows">' +
+      items.map(x => '<li><button type="button" class="rowbtn' + (isDone(T, x.st) ? ' done' : '') + '" data-i="' + x.i + '">' +
+        '<span class="mark-n' + (x.st.type === 'quiz' ? ' is-quiz' : '') + '" aria-hidden="true">' + (isDone(T, x.st) ? '&#10003;' : x.st.type === 'quiz' ? '?' : x.st.no) + '</span>' +
+        '<span class="rowtitle">' + esc(x.st.title) + '</span><span class="rowkind">' + (x.st.type === 'quiz' ? 'Test' : 'Dars') + '</span>' +
+        '<span class="sr-only">' + (isDone(T, x.st) ? ', bajarilgan' : '') + '</span></button></li>').join('') +
+      '</ul></section>';
+  }).join('');
+  topicEl.innerHTML = '<div class="gx"><div class="tv-in">' +
+    '<a class="back" href="#home">&#8249; Barcha mavzular</a>' +
+    '<h1>' + esc(T.title) + '</h1><p class="lede">' + esc(T.blurb) + '</p>' +
+    '<div class="tv-bar"><a class="btn primary" href="#' + T.id + '-' + (start + 1) + '" id="tvStart">' + label + '</a>' +
+    '<span class="count">' + total + ' qadamdan ' + done + ' tasi bajarildi · ' + T.lessonCount + ' dars, ' + T.quizCount + ' test</span></div>' + secs + '</div></div>';
+  $('#tvStart').addEventListener('click', ev => { ev.preventDefault(); go(T, start); });
+  $$('.rowbtn', topicEl).forEach(b => b.addEventListener('click', () => go(T, +b.dataset.i)));
+  $('.back', topicEl).addEventListener('click', ev => { ev.preventDefault(); goHome(); });
+  topicEl.scrollTop = 0;
+}
+
+/* ===== Yuqori panel: qadamlar, menyu ===== */
+function renderNav() {
+  const T = state.topic, st = step();
+  $('#crumbTopic').textContent = T.title;
+  $('#crumbLesson').textContent = stepName(st);
+  $('#stepCount').textContent = (state.idx + 1) + ' / ' + T.steps.length;
+  let segs = '', cur = -1;
+  T.steps.forEach((s, i) => {
+    if (s.section !== cur) { if (cur >= 0) segs += '</span>'; segs += '<span class="seggrp">'; cur = s.section; }
+    const cls = 'seg' + (s.type === 'quiz' ? ' is-quiz' : '') + (isDone(T, s) ? ' done' : '') + (i === state.idx ? ' current' : '');
+    const lbl = (s.type === 'quiz' ? 'Test: ' + s.title : 'Dars ' + s.no + ': ' + s.title) + (isDone(T, s) ? ', bajarilgan' : '');
+    segs += '<button type="button" class="' + cls + '" data-i="' + i + '" title="' + esc(stepName(s)) + '" aria-label="' + esc(lbl) + '"' + (i === state.idx ? ' aria-current="step"' : '') + '></button>';
+  });
+  $('#segs').innerHTML = segs + '</span>';
+  let menu = '', msec = -1;
+  T.steps.forEach((s, i) => {
+    if (s.section !== msec) { msec = s.section; menu += '<div class="menu-sec">' + (msec + 1) + '-boʻlim · ' + esc(T.sections[msec].title) + '</div>'; }
+    menu += '<button type="button" role="menuitem" class="menu-item' + (isDone(T, s) ? ' done' : '') + '" data-i="' + i + '"' + (i === state.idx ? ' aria-current="true"' : '') + '>' +
+      '<span class="menu-num' + (s.type === 'quiz' ? ' is-quiz' : '') + '">' + (s.type === 'quiz' ? '?' : s.no) + '</span><span>' + esc(s.type === 'quiz' ? s.title : s.title) + '</span></button>';
+  });
+  $('#menu').innerHTML = menu;
+  $('#prevBtn').disabled = state.idx === 0;
+  $('#nextBtn').disabled = state.idx === T.steps.length - 1;
+}
+function openMenu() { $('#menu').hidden = false; $('#menuBtn').setAttribute('aria-expanded', 'true'); const cur = $('.menu-item[aria-current]', $('#menu')); if (cur) cur.scrollIntoView({ block: 'nearest' }); }
+function closeMenu() { $('#menu').hidden = true; $('#menuBtn').setAttribute('aria-expanded', 'false'); }
+
+function nextLabel() {
+  const nx = state.topic.steps[state.idx + 1];
+  return !nx ? 'Mavzuni yakunlash' : nx.type === 'quiz' ? 'Testga oʻtish' : 'Keyingi dars';
+}
+function nextStep() {
+  const T = state.topic;
+  if (state.idx < T.steps.length - 1) go(T, state.idx + 1); else goTopic(T);
+}
+
+/* ===== Dars paneli ===== */
+function renderLessonPane() {
+  const T = state.topic, L = step(), S = T.sections[L.section];
+  $('#lessonScroll').innerHTML =
+    '<p class="step-no">' + (L.section + 1) + '-boʻlim · ' + esc(S.title) + '</p>' +
+    '<h1 class="lesson-title">' + esc(L.title) + '</h1>' +
+    '<div class="prose">' + L.learn + '</div>' +
+    (L.example ? '<pre class="ex">' + hlCSS(L.example, true) + '</pre>' : '') +
+    '<div class="task"><p class="task-label">Topshiriq</p>' + L.task + '</div>' +
+    '<div id="doneBox"></div>' +
+    '<h2 class="sec-label">Tekshiruvlar</h2><ul class="checks" id="checks"></ul>' +
+    '<div class="helpers"><button type="button" class="link" id="hintBtn">Maslahatni koʻrsatish</button>' +
+    (SHOW_SOLUTIONS ? '<button type="button" class="link" id="solBtn">Yechimni koʻrsatish</button>' : '') + '</div>' +
+    '<div class="reveal" id="hintBox" hidden><p class="sec-label">Maslahat</p><p>' + L.hint + '</p></div>' +
+    (SHOW_SOLUTIONS ? '<div class="reveal" id="solBox" hidden><p class="sec-label">Yechim</p><pre class="ex">' + hlCSS(L.solution) + '</pre><button type="button" class="btn small" id="useSol">Bu kodni muharrirga qoʻyish</button></div>' : '');
+  $('#lessonScroll').scrollTop = 0;
+  $('#hintBtn').addEventListener('click', () => toggleReveal('hint'));
+  if (SHOW_SOLUTIONS) {
+    $('#solBtn').addEventListener('click', () => toggleReveal('sol'));
+    $('#useSol').addEventListener('click', () => { setCode(L.solution); });
+  }
+  renderChecks();
+}
+function toggleReveal(which) {
+  const box = $('#' + which + 'Box'), btn = $('#' + which + 'Btn');
+  box.hidden = !box.hidden;
+  btn.textContent = which === 'hint' ? (box.hidden ? 'Maslahatni koʻrsatish' : 'Maslahatni yashirish') : (box.hidden ? 'Yechimni koʻrsatish' : 'Yechimni yashirish');
+  if (!box.hidden) box.scrollIntoView({ block: 'nearest' });
+}
+function renderChecks() {
+  const L = step(), res = state.result;
+  const firstFail = res ? res.findIndex(r => !r.ok) : -1;
+  $('#checks').innerHTML = L.tests.map((t, i) => {
+    const r = res && res[i], s = !r ? 'idle' : r.ok ? 'pass' : 'fail';
+    return '<li class="check" data-s="' + s + '"><span class="ico" aria-hidden="true"></span><span class="ct">' + fmt(t[0]) +
+      '<span class="sr-only"> ' + (s === 'pass' ? 'oʻtdi' : s === 'fail' ? 'oʻtmadi' : 'hali tekshirilmagan') + '</span>' +
+      (i === firstFail ? '<span class="why">' + fmt(r.msg) + '</span>' : '') + '</span></li>';
+  }).join('');
+  $('#checks').classList.toggle('stale', state.stale);
+}
+function updateBar() {
+  const T = state.topic, L = step(), r = state.result;
+  let s = 'idle', text = isDone(T, L) ? 'Bu darsni tugatdingiz. Yana tekshirishingiz yoki keyingisiga oʻtishingiz mumkin.' : 'CSS yozing, keyin tekshiring.';
+  if (r) {
+    const p = r.filter(x => x.ok).length;
+    if (state.stale) { s = 'idle'; text = 'Kod oʻzgardi. Tekshiruvni qayta ishga tushiring.'; }
+    else if (p === r.length) { s = 'pass'; text = 'Barcha ' + r.length + ' ta tekshiruv oʻtdi. Zoʻr!'; }
+    else { s = 'fail'; text = r.length + ' tadan ' + p + ' tasi oʻtdi.'; }
+  }
+  const status = $('#status'); status.dataset.s = s; status.textContent = text;
+  const btn = $('#checkBtn'), last = state.idx === T.steps.length - 1;
+  btn.textContent = s === 'pass' ? nextLabel() : 'Kodni tekshirish';
+  btn.classList.toggle('ok', s === 'pass'); btn.classList.toggle('primary', s !== 'pass');
+  btn.dataset.mode = s === 'pass' ? 'next' : 'check';
+  $('#doneBox').innerHTML = s === 'pass' ? '<p class="done-box">' + (last ? (T.finish || 'Mavzu tugadi. Tabriklaymiz!') : 'Dars bajarildi.') + '</p>' : '';
+}
+function check() {
+  const L = step();
+  state.result = runTests(L, ta.value);
+  state.stale = false;
+  if (state.result.every(r => r.ok)) { store.done[keyOf(state.topic, L)] = true; saveStore(true); renderNav(); }
+  renderChecks(); updateBar();
+}
+
+/* ===== Muharrir ===== */
+let lineCount = 0;
+function syncScroll() {
+  hlEl.style.transform = 'translate(' + (-ta.scrollLeft) + 'px,' + (-ta.scrollTop) + 'px)';
+  gutIn.style.transform = 'translateY(' + (-ta.scrollTop) + 'px)';
+}
+function syncEditor() {
+  const v = ta.value;
+  hlEl.innerHTML = hlCSS(v) + '\n';
+  const n = v.split('\n').length;
+  if (n !== lineCount) { gutIn.textContent = Array.from({ length: n }, (_, i) => i + 1).join('\n'); lineCount = n; }
+  syncScroll();
+}
+let previewTimer = 0;
+function updatePreview() { renderInto($('#hostYou'), step().html, ta.value); }
+function setCode(css) {
+  ta.value = css;
+  store.code[keyOf(state.topic, step())] = css; saveStore();
+  state.stale = !!state.result; syncEditor(); updatePreview(); renderChecks(); updateBar();
+}
+ta.addEventListener('input', () => {
+  store.code[keyOf(state.topic, step())] = ta.value; saveStore();
+  state.stale = !!state.result;
+  syncEditor();
+  clearTimeout(previewTimer); previewTimer = setTimeout(updatePreview, 120);
+  if (state.result) { renderChecks(); updateBar(); }
+});
+ta.addEventListener('scroll', syncScroll);
+
+function insertText(text) {
+  ta.focus();
+  let ok = false;
+  try { ok = document.execCommand && document.execCommand('insertText', false, text); } catch (e) { ok = false; }
+  if (!ok) { ta.setRangeText(text, ta.selectionStart, ta.selectionEnd, 'end'); ta.dispatchEvent(new Event('input', { bubbles: true })); }
+}
+function shiftLines(outdent) {
+  const v = ta.value, s = ta.selectionStart, e = ta.selectionEnd;
+  const ls = v.lastIndexOf('\n', s - 1) + 1;
+  const out = v.slice(ls, e).split('\n').map(l => outdent ? l.replace(/^( {1,2}|\t)/, '') : '  ' + l).join('\n');
+  ta.setSelectionRange(ls, e); insertText(out); ta.setSelectionRange(ls, ls + out.length);
+}
+let leaveOnTab = false;
+ta.addEventListener('blur', () => { leaveOnTab = false; });
+ta.addEventListener('keydown', ev => {
+  if (ev.key === 'Escape') { leaveOnTab = true; return; }
+  if (ev.key === 'Tab' && !leaveOnTab) {
+    ev.preventDefault();
+    const multi = ta.value.slice(ta.selectionStart, ta.selectionEnd).indexOf('\n') >= 0;
+    if (ev.shiftKey || multi) shiftLines(ev.shiftKey); else insertText('  ');
+    return;
+  }
+  leaveOnTab = false;
+  if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); check(); return; }
+  if (ev.key === 'Enter' && !ev.shiftKey && !ev.altKey) {
+    const v = ta.value, s = ta.selectionStart, e = ta.selectionEnd;
+    const indent = /^[ \t]*/.exec(v.slice(v.lastIndexOf('\n', s - 1) + 1, s))[0];
+    const before = v[s - 1], after = v[e];
+    ev.preventDefault();
+    if (before === '{' && after === '}') { insertText('\n' + indent + '  \n' + indent); const pos = s + 1 + indent.length + 2; ta.setSelectionRange(pos, pos); }
+    else if (before === '{') insertText('\n' + indent + '  ');
+    else insertText('\n' + indent);
+  }
+});
+
+/* ===== Test (koʻp variantli savollar) ===== */
+function renderQuiz() {
+  const T = state.topic, Q = step(), S = T.sections[Q.section], n = Q.questions.length;
+  $('#quizIn').innerHTML = '<div class="quiz-in">' +
+    '<p class="step-no">' + (Q.section + 1) + '-boʻlim · ' + esc(S.title) + '</p>' +
+    '<h1 class="lesson-title">' + esc(Q.title) + '</h1>' +
+    '<p class="quiz-intro">Har bir savolda bitta toʻgʻri javob bor. Barcha savollarga toʻgʻri javob bersangiz, test bajarilgan hisoblanadi.</p>' +
+    Q.questions.map((q, qi) =>
+      '<div class="q" data-q="' + qi + '" data-s="idle" role="radiogroup" aria-labelledby="qt' + qi + '">' +
+      '<div class="q-head"><span class="q-no">' + (qi + 1) + ' / ' + n + '</span><p class="q-text" id="qt' + qi + '">' + fmt(q.q) + '</p></div>' +
+      (q.code ? '<pre class="ex">' + hlCSS(q.code) + '</pre>' : '') +
+      '<div class="opts">' + q.options.map((o, oi) =>
+        '<label class="opt"><input type="radio" name="q' + qi + '" value="' + oi + '" data-q="' + qi + '"><span class="opt-mark" aria-hidden="true"></span><span class="opt-text">' + fmt(o) + '</span></label>').join('') + '</div>' +
+      '<p class="q-fb" hidden></p></div>').join('') + '</div>';
+  $('#quizScroll').scrollTop = 0;
+}
+function applyQ(qi) {
+  const Q = step(), q = Q.questions[qi], card = $('.q[data-q="' + qi + '"]', quizEl);
+  const r = state.qres && state.qres[qi], a = state.answers[qi];
+  card.dataset.s = r || 'idle';
+  $$('.opt', card).forEach((el, oi) => el.classList.toggle('sel', a === oi));
+  $$('input', card).forEach((inp, oi) => { inp.checked = a === oi; });
+  const fb = $('.q-fb', card);
+  if (!r) { fb.hidden = true; fb.innerHTML = ''; return; }
+  fb.hidden = false;
+  fb.innerHTML = r === 'ok' ? '<strong>Toʻgʻri.</strong> ' + fmt(q.why)
+    : r === 'bad' ? '<strong>Notoʻgʻri.</strong> Boshqa variantni tanlab, qayta tekshiring.'
+    : '<strong>Javob tanlanmagan.</strong> Variantlardan birini tanlang.';
+}
+function updateQBar() {
+  const T = state.topic, Q = step(), n = Q.questions.length, res = state.qres;
+  const answered = state.answers.filter(a => a != null).length;
+  let s = 'idle', text;
+  if (res && res.every(r => r === 'ok')) { s = 'pass'; text = 'Barcha javoblar toʻgʻri. Zoʻr!'; }
+  else if (res && res.some(r => r)) { s = 'fail'; text = n + ' tadan ' + res.filter(r => r === 'ok').length + ' tasi toʻgʻri.'; }
+  else text = answered ? n + ' ta savoldan ' + answered + ' tasiga javob berildi.' : 'Har bir savolga javob bering, keyin tekshiring.';
+  const st = $('#qStatus'); st.dataset.s = s; st.textContent = text;
+  const btn = $('#qBtn');
+  btn.textContent = s === 'pass' ? nextLabel() : 'Javoblarni tekshirish';
+  btn.classList.toggle('ok', s === 'pass'); btn.classList.toggle('primary', s !== 'pass');
+  btn.dataset.mode = s === 'pass' ? 'next' : 'check';
+}
+function checkQuiz(silent) {
+  const T = state.topic, Q = step();
+  state.qres = Q.questions.map((q, i) => state.answers[i] == null ? 'none' : state.answers[i] === q.answer ? 'ok' : 'bad');
+  Q.questions.forEach((_, i) => applyQ(i));
+  if (!silent && state.qres.every(r => r === 'ok')) { store.done[keyOf(T, Q)] = true; saveStore(true); renderNav(); }
+  else if (!silent) { const first = $('.q[data-s="bad"], .q[data-s="none"]', quizEl); if (first) first.scrollIntoView({ block: 'center' }); }
+  updateQBar();
+}
+quizEl.addEventListener('change', ev => {
+  const inp = ev.target;
+  if (!inp.matches || !inp.matches('input[type="radio"]')) return;
+  const qi = +inp.dataset.q, Q = step();
+  state.answers[qi] = +inp.value;
+  delete store.done[keyOf(state.topic, Q)]; renderNav();
+  store.answers[keyOf(state.topic, Q)] = state.answers.slice(); saveStore();
+  if (state.qres) state.qres[qi] = null;
+  applyQ(qi); updateQBar();
+});
+
+/* ===== Navigatsiya ===== */
+function setTab(name) {
+  state.tab = name; lessonEl.dataset.tab = name;
+  $$('.tabs [role="tab"]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+}
+function setFile(f) {
+  state.file = f;
+  $('#editor').hidden = f !== 'css'; $('#htmlView').hidden = f !== 'html'; $('#roLabel').hidden = f !== 'html'; $('#resetBtn').hidden = f !== 'css';
+  $('#tabCss').setAttribute('aria-selected', String(f === 'css')); $('#tabHtml').setAttribute('aria-selected', String(f === 'html'));
+}
+function setMode(m) {
+  state.mode = m;
+  $('#hostYou').hidden = m !== 'you'; $('#hostGoal').hidden = m !== 'goal';
+  $('#tabYou').setAttribute('aria-selected', String(m === 'you')); $('#tabGoal').setAttribute('aria-selected', String(m === 'goal'));
+}
+
+function setHash(h) { try { if (location.hash.replace(/^#/, '') !== h) location.hash = h; } catch (e) { /* ignore */ } }
+
+function openStep(T, i) {
+  state.topic = T; state.idx = i; state.result = null; state.stale = false; state.qres = null;
+  document.title = 'CSS Workbench';
+  const st = step();
+  if (st.type === 'quiz') openQuiz(T, st); else openLesson(T, st);
+}
+function openLesson(T, L) {
+  show('lesson');
+  renderNav(); renderLessonPane();
+  ta.value = store.code[keyOf(T, L)] != null ? store.code[keyOf(T, L)] : L.css;
+  lineCount = 0; syncEditor(); ta.scrollTop = 0; ta.scrollLeft = 0; syncScroll();
+  $('#htmlView').innerHTML = hlHTML(L.html);
+  renderInto($('#hostYou'), L.html, ta.value);
+  renderInto($('#hostGoal'), L.html, L.solution);
+  setFile('css'); setMode('you'); setTab('lesson');
+  updateBar();
+}
+function openQuiz(T, Q) {
+  show('quiz');
+  renderNav(); renderQuiz();
+  const stored = store.answers[keyOf(T, Q)];
+  state.answers = Q.questions.map((q, i) => (stored && Number.isInteger(stored[i])) ? stored[i] : null);
+  const done = isDone(T, Q);
+  
+  Q.questions.forEach((_, i) => applyQ(i));
+  if (done) checkQuiz(true); else updateQBar();
+}
+function go(T, i) { openStep(T, i); setHash(T.id + '-' + (i + 1)); }
+function goHome() { renderHome(); setHash('home'); }
+function goTopic(T) { renderTopic(T); setHash(T.id); }
+function route() {
+  const h = (location.hash || '').replace(/^#/, '');
+  const m = /^(.+)-(\d+)$/.exec(h);
+  if (m) {
+    const T = TOPICS.find(t => t.id === m[1]), i = +m[2] - 1;
+    if (T && T.steps[i]) {
+      const inStep = state.view === 'lesson' || state.view === 'quiz';
+      if (!inStep || state.topic !== T || state.idx !== i) openStep(T, i);
+      return;
+    }
+  }
+  const T = TOPICS.find(t => t.id === h);
+  if (T) { if (state.view !== 'topic' || state.topic !== T) renderTopic(T); return; }
+  if (state.view !== 'home' || !homeEl.innerHTML) renderHome();
+}
+
+/* ===== Ulash ===== */
+$('.brand').addEventListener('click', ev => { ev.preventDefault(); goHome(); });
+$('#menuBtn').addEventListener('click', () => { $('#menu').hidden ? openMenu() : closeMenu(); });
+$('#menu').addEventListener('click', ev => { const b = ev.target.closest('.menu-item'); if (b) go(state.topic, +b.dataset.i); });
+$('#segs').addEventListener('click', ev => { const b = ev.target.closest('.seg'); if (b) go(state.topic, +b.dataset.i); });
+$('#prevBtn').addEventListener('click', () => go(state.topic, state.idx - 1));
+$('#nextBtn').addEventListener('click', () => go(state.topic, state.idx + 1));
+document.addEventListener('click', ev => { if (!$('#menu').hidden && !ev.target.closest('.crumbs')) closeMenu(); });
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !$('#menu').hidden) { closeMenu(); $('#menuBtn').focus(); } });
+$$('.tabs [role="tab"]').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
+$('#tabCss').addEventListener('click', () => setFile('css'));
+$('#tabHtml').addEventListener('click', () => setFile('html'));
+$('#tabYou').addEventListener('click', () => setMode('you'));
+$('#tabGoal').addEventListener('click', () => setMode('goal'));
+$('#checkBtn').addEventListener('click', () => { if ($('#checkBtn').dataset.mode === 'next') nextStep(); else check(); });
+$('#qBtn').addEventListener('click', () => { if ($('#qBtn').dataset.mode === 'next') nextStep(); else checkQuiz(); });
+$('#status').addEventListener('click', () => { setTab('lesson'); const c = $('#checks'); if (c) c.scrollIntoView({ block: 'nearest' }); });
+let resetTimer = 0;
+$('#resetBtn').addEventListener('click', () => {
+  const b = $('#resetBtn');
+  if (b.classList.contains('confirm')) {
+    clearTimeout(resetTimer); b.classList.remove('confirm'); b.textContent = 'Tiklash';
+    setCode(step().css); delete store.code[keyOf(state.topic, step())]; saveStore(true);
+  } else {
+    b.classList.add('confirm'); b.textContent = 'Tasdiqlash uchun yana bosing';
+    resetTimer = setTimeout(() => { b.classList.remove('confirm'); b.textContent = 'Tiklash'; }, 3000);
+  }
+});
+window.addEventListener('hashchange', () => { if (!$('#app').hidden) route(); });
+
+const account = createAccount({
+  legacyKey: STORE_KEY, topics: TOPICS, read: () => store,
+  restore(value) {
+    clearTimeout(previewTimer);
+    store = value;
+    state.view = '';
+    route();
+  }
+});
+account.start();
+})();
+
+</script>
+</body>
+</html>

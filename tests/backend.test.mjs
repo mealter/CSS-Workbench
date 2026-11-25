@@ -1,0 +1,64 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createHmac} from 'node:crypto';
+import {fixture} from './local-backend.mjs';
+import topics from '../public/curriculum.js';
+test('gateway and Apps Script contract on simulated services',async t=>{
+  const f=fixture();t.after(f.close);
+  const credentials={username:'Student01',password:'test-password',confirmation:'test-password'};
+  const auth=(action,fields)=>f.api({action,...credentials,...fields});
+  for(const [fields,code] of [[{username:'=1+1'},400],[{confirmation:'different'},400],[{password:'short'},400]])
+    assert.equal((await auth('register',fields)).status,code);
+  const registrations=await Promise.all([auth('register'),auth('register',{username:'STUDENT01'})]);
+  assert.deepEqual(registrations.map(r=>r.status).sort(),[200,409]);
+  assert.equal(f.tabs.Users.rows.length,2);assert.equal(f.tabs.Progress.rows.length,2);
+  assert.equal((await auth('login',{password:'wrong-password'})).status,401);
+  const response=await auth('login');assert.equal(response.status,200);
+  const payload=await response.json();assert.deepEqual(Object.keys(payload).sort(),['revision','state','user']);
+  const header=response.headers.get('set-cookie');assert.match(header,/HttpOnly; Secure; SameSite=Strict/);
+  const cookie=header.split(';')[0];
+  const call=(action,body={})=>f.api({action,expectedUser:'student01',...body},cookie);
+  assert.equal((await call('getSession')).status,200);
+  assert.equal((await call('getProgress',{expectedUser:'student02'})).status,401);
+  assert.equal((await f.api({action:'getProgress'})).status,401);
+  assert.equal((await f.api({action:'logout'},cookie,{origin:'https://other.invalid'})).status,403);
+  const old=cookie.split('=')[1].split('.');old[2]='1';old[3]=createHmac('sha256',process.env.SESSION_SECRET).update(old.slice(0,3).join('.')).digest('base64url');
+  assert.equal((await f.api({action:'getSession'},'__Host-workbench='+old.join('.'))).status,401);
+  const state=payload.state, lesson=topics[0].id+'/'+topics[0].sections[0].steps[0].id;
+  state.code[lesson]='a'.repeat(39950)+'=SUM(1,2)'+'🚀'.repeat(45000);state.done[lesson]=true;
+  const quiz=topics[0].sections[0].steps.find(s=>s.questions), qkey=topics[0].id+'/'+quiz.id;
+  state.answers[qkey]=quiz.questions.map(q=>q.answer);state.done[qkey]=true;
+  const save=(revision,state)=>call('saveProgress',{revision,state});
+  assert.equal((await save(0,state)).status,200);
+  assert.deepEqual((await (await call('getProgress')).json()).state,state);
+  const row=f.tabs.Progress.rows[1];assert.equal(row[1],1);assert.equal(row[4],quiz.questions.length);assert.equal(row[7],1);
+  assert.ok(f.tabs.Progress.rows[0].includes('JSON 3'));
+  const shorter=structuredClone(state);shorter.code[lesson]='';shorter.answers[qkey]=[null];
+  const later=structuredClone(shorter);later.code[lesson]='alternate';
+  const race=await Promise.all([save(1,shorter),save(1,later)]);
+  assert.deepEqual(race.map(r=>r.status).sort(),[200,409]);
+  assert.equal((await (await call('getProgress')).json()).state.done[qkey],undefined);assert.equal(row[4],0);
+  assert.equal((await save(2,{...shorter,marks:100})).status,422);
+  assert.equal((await call('saveProgress',{expectedUser:'student02',revision:2,state:shorter})).status,401);
+  f.control.quota=true;assert.equal((await call('getProgress')).status,503);f.control.quota=false;
+  const reset=await f.api({action:'adminHash',password:'new-password'},'',{'x-workbench-secret':process.env.GAS_SECRET});
+  assert.equal(reset.status,200);
+  const newHash=(await reset.json()).hash;
+  f.ctx.PropertiesService.getScriptProperties().setProperties({SITE_ORIGIN:'https://school.example'});
+  f.ctx.Utilities.getUuid=()=>'12345678-aaaa-bbbb-cccc-111111111111';
+  let resetNotice='';
+  f.ctx.SpreadsheetApp.getUi=()=>({ButtonSet:{OK_CANCEL:1},Button:{OK:1},
+    prompt:()=>({getSelectedButton:()=>1,getResponseText:()=>'student01'}),alert:text=>{resetNotice=text;}});
+  f.ctx.UrlFetchApp={fetch:(url,opts)=>{
+    assert.equal(url,'https://school.example/api/workbench');
+    assert.equal(opts.headers['x-workbench-secret'],process.env.GAS_SECRET);
+    return {getContentText:()=>JSON.stringify({hash:newHash})};
+  }};
+  f.ctx.resetStudentPassword();
+  assert.match(resetNotice,/12345678/);assert.equal(f.tabs.Users.rows[1][1],newHash);
+  assert.equal((await call('getProgress')).status,401);
+  assert.match((await call('logout')).headers.get('set-cookie'),/Max-Age=0/);
+  let last;for(let i=0;i<13;i++)last=await auth('login',{password:'wrong-password'});
+  assert.equal(last.status,429);
+});
+
