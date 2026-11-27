@@ -13,3 +13,7 @@
 
 #sync{min-inline-size:min(100%,24ch)}
 @media(max-width:520px){#account{display:grid;grid-template-columns:minmax(0,1fr) auto auto;column-gap:8px}#sync{grid-column:1 / -1;grid-row:2;min-height:1.55em}#logout{grid-column:3;grid-row:1}#importOld{grid-column:1 / -1}}
+
+#pending{color:var(--fg)}
+#lastSync{font-variant-numeric:tabular-nums}
+@media(max-width:520px){#pending,#lastSync{grid-column:1 / -1}#manualSync{grid-column:1 / -1;justify-self:start}}

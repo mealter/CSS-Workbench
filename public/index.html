@@ -318,7 +318,7 @@ code{font:500 .88em var(--font-mono);background:var(--surface2);padding:.12em .4
         <button type="button" class="iconbtn" id="nextBtn" aria-label="Keyingi qadam">&#8250;</button>
       </div>
     </div>
-    <div id="account" class="gx"><strong id="who"></strong><span id="percent"></span><span id="sync" role="status"></span><button hidden id="importOld" class="btn small">Eski natijalarni import qilish</button><button class="btn small" id="logout">Chiqish</button></div>
+    <div id="account" class="gx"><strong id="who"></strong><span id="percent"></span><span id="sync" role="status"></span><span id="pending" hidden></span><time id="lastSync"></time><button id="manualSync" class="btn small" type="button">Hozir sinxronlash</button><button hidden id="importOld" class="btn small">Eski natijalarni import qilish</button><button class="btn small" id="logout">Chiqish</button></div>
     <div hidden id="resolve"><span id="conflictText"></span> <button id="keepLocal" class="btn small">Shu qurilmadagi nusxani saqlash</button> <button id="useCloud" class="btn small">Bulutdagi nusxani olish</button></div>
   </header>
 
@@ -391,6 +391,7 @@ code{font:500 .88em var(--font-mono);background:var(--surface2);padding:.12em .4
 </div>
 
 <script src="curriculum.js"></script>
+<script src="progress-summary.js"></script>
 <script src="account.js"></script>
 <script>
 (function () {
