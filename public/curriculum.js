@@ -169,7 +169,7 @@ topics.push({
             ['`.dashed` da uzuq chiziqli chegara bor', c => c.allSides('.dashed', 'style', 'dashed')],
             ['`.dotted` da nuqtali chegara bor', c => c.allSides('.dotted', 'style', 'dotted')],
             ['`.double` da ikkilangan chegara bor', c => c.allSides('.double', 'style', 'double')],
-            ['Ikkilangan chegara kamida `3px` qalin', c => c.assert(c.px(c.side('.double', 'top', 'width')) >= 3, 'Ikkilangan chegarada ikki chiziq koʻrinishi uchun kamida `3px` kerak.')]
+            ['Ikkilangan chegara kamida `3px` qalin', c => c.assert(c.strokeMatches('.double', 'border-top-width', '3px', true), 'Ikkilangan chegarada ikki chiziq koʻrinishi uchun kamida `3px` kerak.')]
           ]
         },
         {
@@ -269,7 +269,7 @@ topics.push({
                 c.assert(r.unit === 'px' && r.n >= h / 2 - 0.5, '`.pill` burchaklarining piksel radiusi balandligining kamida yarmiga teng boʻlishi kerak. Foiz oval uch beradi. `999px` ni sinab koʻring.');
               });
             }],
-            ['`.avatar` kengligi va balandligi hamon `120px`', c => c.assert(c.val('.avatar', 'width') === '120px' && c.val('.avatar', 'height') === '120px', '`.avatar` ning kengligi va balandligini `120px` qoldiring.')]
+            ['`.avatar` kengligi va balandligi hamon `120px`', c => c.assert(c.lengthMatches('.avatar', 'width', '120px') && c.lengthMatches('.avatar', 'height', '120px'), '`.avatar` ning kengligi va balandligini `120px` qoldiring.')]
           ]
         },
         {
@@ -338,9 +338,9 @@ topics.push({
 
           hint: 'Tashqi chiziq bilan element orasidagi masofani ham tekshiring. Chiziqni chizish va uni siljitish uchun turli xossalar kerak.',
           tests: [
-            ['`.selected` da `3px solid` outline bor', c => c.assert(c.val('.selected', 'outline-width') === '3px' && c.val('.selected', 'outline-style') === 'solid', '`outline: 3px solid orange;` dan foydalaning.')],
+            ['`.selected` da `3px solid` outline bor', c => c.assert(c.strokeMatches('.selected', 'outline-width', '3px') && c.val('.selected', 'outline-style') === 'solid', '`outline: 3px solid orange;` dan foydalaning.')],
             ['Outline rangi `orange`', c => c.assert(c.val('.selected', 'outline-color') === c.color('orange'), 'Outline rangi `orange` boʻlishi kerak.')],
-            ['Outline quti bilan orasida `4px` masofa bor', c => c.assert(c.val('.selected', 'outline-offset') === '4px', '`outline-offset: 4px;` qoʻshing.')],
+            ['Outline quti bilan orasida `4px` masofa bor', c => c.assert(c.strokeMatches('.selected', 'outline-offset', '4px'), '`outline-offset: 4px;` qoʻshing.')],
             ['`.selected` da chegara yoʻq', c => c.allSides('.selected', 'width', '0px')],
             ['Quti kattalashmadi', c => c.assert(c.q('.selected').offsetWidth === c.qa('.item')[1].offsetWidth, '`.selected` boshqa qutidan kengroq. `border` emas, `outline` ishlating.')]
           ]
@@ -358,7 +358,7 @@ topics.push({
           tests: [
             ['`.box` da `box-sizing: border-box` bor', c => c.assert(c.val('.box', 'box-sizing') === 'border-box', '`box-sizing: border-box;` qoʻshing.')],
             ['`.box` ning umumiy kengligi aniq `200px`', c => { const w = Math.round(c.q('.box').getBoundingClientRect().width); c.assert(w === 200, '`.box` ning umumiy kengligi `' + w + 'px`. U `200px` boʻlishi kerak.'); }],
-            ['Padding va chegara oʻzgartirilmagan', c => c.assert(c.side('.box', 'top', 'width') === '10px' && c.val('.box', 'padding-left') === '20px', '`20px` padding va `10px` chegarani oʻz holicha qoldiring.')]
+            ['Padding va chegara oʻzgartirilmagan', c => c.assert(c.strokeMatches('.box', 'border-top-width', '10px') && c.lengthMatches('.box', 'padding-left', '20px'), '`20px` padding va `10px` chegarani oʻz holicha qoldiring.')]
           ]
         },
         {
@@ -516,7 +516,7 @@ topics.push({
           hint: 'Quti bilan uning tashqarisidagi elementlar orasidagi joyni qaysi xossa boshqaradi? To‘rt tomonda masofa bir xil.',
           tests: [
             ['`.box` ning toʻrt tomonida ham `24px` margin bor', c => c.qa('.box').forEach(b => c.allMargins(b, '24px'))],
-            ['Ichki masofa (`padding`) hamon `12px`', c => c.assert(c.val('.box', 'padding-top') === '12px', 'Margin — tashqi masofa. Ichki masofa (`padding`) ni `12px` qoldiring va `margin` yozing.')]
+            ['Ichki masofa (`padding`) hamon `12px`', c => c.assert(c.lengthMatches('.box', 'padding-top', '12px'), 'Margin — tashqi masofa. Ichki masofa (`padding`) ni `12px` qoldiring va `margin` yozing.')]
           ]
         },
         {
@@ -625,7 +625,7 @@ topics.push({
           tests: [
             ['Quti gorizontal markazda', c => { const r = c.room('.box'); c.assert(r.left > 1 && Math.abs(r.left - r.right) < 1, 'Quti markazda emas: chapda `' + c.n1(r.left) + 'px`, oʻngda `' + c.n1(r.right) + 'px` boʻsh joy bor. Ikkalasi teng boʻlishi kerak.'); }],
             ['Chap va oʻng margin larda `auto` ishlatilgan', c => c.assert(/auto/.test(c.src), 'Chap va oʻng margin larga `auto` bering: `margin: 0 auto;`.')],
-            ['Quti kengligi hamon `240px`', c => c.assert(c.val('.box', 'width') === '240px', 'Kenglikni `240px` qoldiring.')]
+            ['Quti kengligi hamon `240px`', c => c.assert(c.lengthMatches('.box', 'width', '240px'), 'Kenglikni `240px` qoldiring.')]
           ]
         },
         {
@@ -641,7 +641,7 @@ topics.push({
           tests: [
             ['Quti oʻng chetga taqalgan', c => { const r = c.room('.logout'); c.assert(r.left > 1 && Math.abs(r.right) < 1, 'Quti oʻng chetga taqalmagan: chapda `' + c.n1(r.left) + 'px`, oʻngda `' + c.n1(r.right) + 'px` boʻsh joy bor. Oʻngda `0px` boʻlishi kerak.'); }],
             ['Chap margin da `auto` ishlatilgan', c => c.assert(/auto/.test(c.src), '`margin-left: auto;` deb yozing.')],
-            ['Quti kengligi hamon `120px`', c => c.assert(c.val('.logout', 'width') === '120px', 'Kenglikni `120px` qoldiring.')]
+            ['Quti kengligi hamon `120px`', c => c.assert(c.lengthMatches('.logout', 'width', '120px'), 'Kenglikni `120px` qoldiring.')]
           ]
         },
         {

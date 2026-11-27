@@ -218,7 +218,13 @@ code{font:500 .88em var(--font-mono);background:var(--surface2);padding:.12em .4
 
 /* ---------- action bar ---------- */
 .actionbar{flex:none;background:var(--surface);border-top:1px solid var(--line)}
-.actionbar-in{display:flex;align-items:center;gap:12px;padding-block:10px}
+.actionbar-in{display:flex;align-items:center;gap:12px;padding-block:10px;padding-inline-end:max(192px,env(safe-area-inset-right))}
+.actionbar-in .btn,#toolbarCheck{min-height:44px}
+@media(max-width:600px){
+  .actionbar-in{display:grid;grid-template-columns:minmax(0,1fr);justify-items:start;gap:4px;padding-inline-end:16px}
+  .actionbar-in .status{grid-row:1}
+  .actionbar-in .btn{max-width:calc(100% - 176px);white-space:normal}
+}
 .status{flex:1;min-width:0;padding:0;background:none;border:0;text-align:left;font-size:14px;color:var(--muted);cursor:pointer}
 .status[data-s="pass"]{color:var(--ok);font-weight:600}
 .status[data-s="fail"]{color:var(--bad);font-weight:600}
@@ -367,8 +373,8 @@ code{font:500 .88em var(--font-mono);background:var(--surface2);padding:.12em .4
 
     <footer class="actionbar">
       <div class="actionbar-in gx">
-        <button type="button" class="status" id="status" data-s="idle" aria-live="polite"></button>
         <button type="button" class="btn primary" id="checkBtn">Kodni tekshirish</button>
+        <button type="button" class="status" id="status" data-s="idle" aria-live="polite"></button>
       </div>
     </footer>
   </section>
@@ -377,8 +383,8 @@ code{font:500 .88em var(--font-mono);background:var(--surface2);padding:.12em .4
     <div class="quiz-scroll" id="quizScroll"><div class="gx" id="quizIn"></div></div>
     <footer class="actionbar">
       <div class="actionbar-in gx">
-        <p class="status" id="qStatus" data-s="idle" aria-live="polite"></p>
         <button type="button" class="btn primary" id="qBtn">Javoblarni tekshirish</button>
+        <p class="status" id="qStatus" data-s="idle" aria-live="polite"></p>
       </div>
     </footer>
   </section>
@@ -529,10 +535,38 @@ function makeCtx(root, src) {
   const val = (x, prop) => getComputedStyle(toEl(x)).getPropertyValue(prop).trim();
   const side = (x, s, p) => val(x, 'border-' + s + '-' + p);
   const nameOf = x => typeof x === 'string' ? x : (x.className ? '.' + String(x.className).split(' ')[0] : x.tagName.toLowerCase());
+  // Read the student and a known length through the same CSSOM and pixel grid.
+  // A second read on the disposable host separates widths that share a device pixel.
+  function strokeMeasurement(x, prop, want, minimum = false) {
+    const reference = document.createElement('span');
+    reference.style.cssText = 'all:initial !important;position:absolute !important;border-style:solid !important;outline-style:solid !important';
+    reference.style.setProperty(prop, want, 'important');
+    root.appendChild(reference);
+    const host = root.host;
+    function read() {
+      const got = val(x, prop), expected = val(reference, prop);
+      return {got, ok: minimum ? parseFloat(got) >= parseFloat(expected) : got === expected};
+    }
+    try {
+      const native = read();
+      if (!native.ok) return native;
+      host.style.zoom = '256';
+      return read();
+    } finally {
+      host.style.removeProperty('zoom');
+      reference.remove();
+    }
+  }
+  // Layout lengths can differ in the last fraction of a CSS layout unit.
+  function sameLength(got, want) {
+    return got === want || (got.endsWith('px') && want.endsWith('px') &&
+      Math.abs(parseFloat(got) - parseFloat(want)) < 0.025);
+  }
   function expectSide(x, s, p, want, label) {
-    const got = side(x, s, p);
+    const width = p === 'width' && strokeMeasurement(x, 'border-' + s + '-width', want);
+    const got = width ? width.got : side(x, s, p);
     const w = p === 'color' ? normColor(want) : want;
-    if (got !== w) {
+    if (width ? !width.ok : got !== w) {
       let m = tk(nameOf(x)) + ' elementining ' + SIDE_UZ[s] + ' chegarasining ' + PROP_UZ[p] + ' ' + tk(got) + ', lekin ' + tk(label || want) + ' boʻlishi kerak.';
       if (p === 'width' && got === '0px') m += ' Chegara faqat `border-style` qiymati `none` boʻlmaganda koʻrinadi.';
       fail(m);
@@ -544,7 +578,7 @@ function makeCtx(root, src) {
   }
   function expectCorner(x, k, want) {
     const got = radius(x, k).raw;
-    if (got !== want) fail(tk(nameOf(x)) + ' elementining ' + CORNER_UZ[k] + ' burchagining radiusi ' + tk(got) + ', lekin ' + tk(want) + ' boʻlishi kerak.');
+    if (!sameLength(got, want)) fail(tk(nameOf(x)) + ' elementining ' + CORNER_UZ[k] + ' burchagining radiusi ' + tk(got) + ', lekin ' + tk(want) + ' boʻlishi kerak.');
   }
   const pf = v => parseFloat(v) || 0;
   const rect = x => toEl(x).getBoundingClientRect();
@@ -558,7 +592,7 @@ function makeCtx(root, src) {
   function parentWidth(x) { const p = toEl(x).parentElement, cs = getComputedStyle(p); return p.clientWidth - pf(cs.paddingLeft) - pf(cs.paddingRight); }
   function expectMargin(x, s, want, label) {
     const got = val(x, 'margin-' + s);
-    if (got !== want) fail(tk(nameOf(x)) + ' elementining ' + SIDE_UZ[s] + ' margini ' + tk(got) + ', lekin ' + tk(label || want) + ' boʻlishi kerak.');
+    if (!sameLength(got, want)) fail(tk(nameOf(x)) + ' elementining ' + SIDE_UZ[s] + ' margini ' + tk(got) + ', lekin ' + tk(label || want) + ' boʻlishi kerak.');
   }
   return {
     src: src, CORNERS: CORNERS,
@@ -571,6 +605,8 @@ function makeCtx(root, src) {
     px: v => parseFloat(v) || 0,
     color: normColor,
     assert: (cond, msg) => { if (!cond) fail(msg); },
+    strokeMatches: (x, prop, want, minimum) => strokeMeasurement(x, prop, want, minimum).ok,
+    lengthMatches: (x, prop, want) => sameLength(val(x, prop), want),
     expectSide: expectSide,
     expectCorner: expectCorner,
     allSides: (x, p, want, label) => SIDES.forEach(s => expectSide(x, s, p, want, label)),
